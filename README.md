@@ -1,9 +1,9 @@
 # KeyPilot — Password Security Toolkit (Chrome Extension)
 
 A premium, fully offline Chrome extension for generating strong passwords,
-checking password strength, and handling everyday password-security tasks
-— bulk generation, usernames, and configurable defaults — without ever
-sending your data anywhere.
+checking and comparing password strength, and handling everyday
+password-security tasks — bulk generation, usernames, favorites, and
+configurable defaults — without ever sending your data anywhere.
 
 ## Features
 
@@ -18,7 +18,11 @@ sending your data anywhere.
   count
 - **Security presets** — Banking, Email, Social, Work, Gaming,
   Developer — apply a recommended configuration in one click
-- One-click **Copy** with toast + button confirmation
+- One-click **Copy** with toast + button confirmation, and a **☆
+  Favorite** button to save the current password (see Favorites below)
+- Keyboard shortcuts while the Generator screen is focused and you're
+  not typing in a field: **G** generate, **C** copy, **F** toggle
+  favorite
 - A clear warning (announced to screen readers) when the current
   options leave no usable characters, with Generate/Copy disabled
   until you fix it
@@ -38,7 +42,8 @@ sending your data anywhere.
   - **Theme-Based** — Nature, Space, Ocean, Cyber, or Fantasy word
     lists
 - Every mode produces 5 unique suggestions, each with its own strength
-  label, length, **Copy** (with confirmation), and **Regenerate**
+  label, length, **Copy** (with confirmation), **Regenerate**, and a
+  **☆ Favorite** button
 - **Copy All** / **Refresh All** for the whole suggestion set
 - Your last-used mode is remembered — the name/word/theme input itself
   never is
@@ -50,13 +55,22 @@ sending your data anywhere.
 - **Username Generator** — 5 suggestions per generate in 4 styles
   (Professional, Minimal, Gaming, Developer), each with its own
   **Copy** and **Regenerate**
+- **Favorites** — every password you've starred, newest first, with
+  **Copy**, **Generate Similar** (a fresh password with the same
+  length and character mix, not a predictable tweak of the original),
+  and **Remove**
+- **Recent Passwords** — your last 20 copied passwords, tracked
+  automatically, with **Copy**, **Generate Similar**, and a **☆ Save**
+  button to promote one to Favorites
+- Favorites and Recent both offer **Export TXT** / **Export CSV** (one
+  password per line/row) and a one-click **Clear**
 
 **Checker**
-- Type or paste any password to instantly see its **Strength**,
-  **character count**, **Security Score** (0–100, penalized for
-  common/repeated/sequential patterns — not just raw entropy), and
-  **Estimated Crack Time** (assuming a 10-billion-guess-per-second
-  offline attack)
+- **Check Password** mode: type or paste any password to instantly see
+  its **Strength**, **character count**, **Security Score** (0–100,
+  penalized for common/repeated/sequential patterns — not just raw
+  entropy), and **Estimated Crack Time** (assuming a
+  10-billion-guess-per-second offline attack)
 - **Weaknesses** and matching **Improvement Tips** lists flag short
   length, missing character types, commonly used passwords, repeated
   characters (`aaa`), and sequential runs (`abc`, `123`) — with a
@@ -64,6 +78,9 @@ sending your data anywhere.
 - **Show/Hide** toggle on the password field
 - **Generate Stronger Password** — a ready-to-use 20-character
   replacement, with the same Copy/Regenerate card used everywhere else
+- **Compare Passwords** mode: two password fields, each analyzed
+  independently and live as you type, with a clear "Password A/B is
+  stronger" (or tie) callout once both have input
 
 **Settings**
 - **Default length** and **default Smart mode**, directly bound to the
@@ -79,20 +96,41 @@ sending your data anywhere.
 
 - Everything runs **entirely locally** — there are no network calls,
   no analytics, and no external services anywhere in the extension.
-- **Passwords and personal input are never saved, tracked, or
-  transmitted** — not the password you're checking, not a name or
-  word you type into Smart Password, regardless of the preferences
-  setting below. They exist only in memory for as long as the popup
-  is open.
-- The only things ever written to `chrome.storage.local` are
-  non-sensitive UI preferences: your length/character-type settings,
-  your last-used Smart mode, and the remember-preferences flag itself
-  — and only while **Remember my preferences** (Settings) is on. Turn
-  it off and even those are cleared.
+  There is no account, no login, and no cloud sync of any kind.
+- **Typed input is never saved, tracked, or transmitted**: the
+  password you check or compare on the Checker screen, and any
+  name/word you type into Smart Password, exist only in memory for as
+  long as the popup is open and are gone the moment you close it.
+- **Favorites and Recent Passwords are the one deliberate exception**:
+  when you tap **☆ Favorite** on a password, or copy any single
+  password anywhere in the app, that password's plaintext value *is*
+  written to `chrome.storage.local` on your device so it can show up
+  in the Favorites/Recent lists on the Tools screen. This is local to
+  your machine only — it is never transmitted anywhere — but it is a
+  real change from "nothing is ever saved," so it's called out
+  explicitly here rather than left implicit:
+  - **Recent** tracks up to your last 20 copied passwords automatically.
+    Multi-password actions (**Copy All**, bulk exports) do not add to
+    Recent — only single-password copies do.
+  - **Favorites** are kept until you remove them individually or tap
+    **Clear**.
+  - Both have a one-click **Clear**, and neither respects the
+    **Remember my preferences** toggle below — favoriting or copying a
+    password is an explicit action, so it's always honored regardless
+    of that preferences setting. If you'd rather nothing be kept at
+    all, simply don't use ☆ Favorite, and periodically clear Recent.
+- Everything else — your length/character-type settings, your
+  last-used Smart mode, and the remember-preferences flag itself — is
+  non-sensitive UI preference data, written to `chrome.storage.local`
+  only while **Remember my preferences** (Settings) is on. Turn it off
+  and even those are cleared; **Reset All Settings** clears them too
+  (it does not touch Favorites/Recent, which have their own Clear
+  buttons so resetting your preferences can't accidentally delete
+  passwords you deliberately saved).
 - All randomness comes from the Web Crypto API
   (`crypto.getRandomValues`), never `Math.random`.
 - The only permission requested is `storage`, used exclusively for the
-  preferences above.
+  data described above — all of it stays on your device.
 
 ## Installation (load unpacked)
 
@@ -114,22 +152,26 @@ sending your data anywhere.
    or adjust the length (slider or number field) and character types
    yourself — the password regenerates automatically as you change
    options. Open **Advanced options** to avoid similar-looking
-   characters or exclude specific characters. Click **Generate
-   Password** for a new one, or **Copy** to copy it to your clipboard.
+   characters or exclude specific characters. Click **Generate** for a
+   new one, **Copy** to copy it, or **☆** to save it to Favorites.
+   With the popup focused and no field selected, **G**/**C**/**F** do
+   the same three things from the keyboard.
 4. On **Smart**: choose a **Mode** (From Name, From Words, Memorable,
    Passphrase, Pronounceable, or Theme-Based), fill in any fields shown
    for that mode, and click **Generate Suggestions** to get 5 secure
-   suggestions. Use **Copy** or **Regenerate** on any single suggestion,
-   or **Copy All** / **Refresh All** for the whole set.
+   suggestions. Use **Copy**, **Regenerate**, or **☆** on any single
+   suggestion, or **Copy All** / **Refresh All** for the whole set.
 5. On **Tools**: choose **Bulk Passwords** to generate 10–100 passwords
-   at once using your current Generator settings, or **Username
-   Generator** to get 5 suggestions in a Professional, Minimal, Gaming,
-   or Developer style.
-6. On **Checker**: type or paste a password to see its strength,
-   security score, estimated crack time, and a list of weaknesses with
-   tips to fix them. Use **Show/Hide** to reveal or mask what you
-   typed, and click **Generate Stronger Password** for a ready-to-use
-   alternative.
+   at once using your current Generator settings, **Username
+   Generator** for 5 suggestions in a Professional, Minimal, Gaming, or
+   Developer style, **Favorites** for everything you've starred, or
+   **Recent Passwords** for your last 20 copies. Favorites and Recent
+   support **Export TXT/CSV** and **Clear**.
+6. On **Checker**: switch between **Check Password** (strength,
+   security score, estimated crack time, weaknesses and tips, plus
+   **Generate Stronger Password**) and **Compare Passwords** (two
+   inputs, analyzed side by side with a stronger-password callout).
+   Use **Show/Hide** to reveal or mask what you typed.
 7. On **Settings**: set your default length and default Smart mode,
    toggle whether KeyPilot remembers your preferences on this device,
    reset everything to defaults, or check the About card for the
@@ -161,6 +203,10 @@ Password Generator - Chrome Extension/
 │   │   ├── themePassword.js        # Theme-Based mode
 │   │   ├── bulkGenerator.js        # Bulk password generation (10/25/50/100)
 │   │   ├── usernameGenerator.js    # Username generation (4 styles)
+│   │   ├── passwordLibrary.js      # Favorites/Recent chrome.storage.local wrapper
+│   │   ├── similarPassword.js      # Generate Similar (matches length + character profile)
+│   │   ├── comparePasswords.js     # Compare Passwords analysis + winner
+│   │   ├── exportPasswords.js      # TXT/CSV formatting + file download
 │   │   ├── randomUtils.js          # shared crypto-random helpers
 │   │   ├── charsets.js             # shared digit/symbol charsets
 │   │   ├── wordLists.js            # shared common + per-theme word lists
@@ -168,9 +214,10 @@ Password Generator - Chrome Extension/
 │   └── components/
 │       ├── toast.js              # reusable toast notification
 │       ├── strengthMeter.js      # strength bar + label + count
-│       ├── smartResults.js       # suggestion cards (copy + regenerate)
+│       ├── smartResults.js       # suggestion cards (copy + regenerate + favorite)
 │       ├── usernameResults.js    # username cards (copy + regenerate, no strength/length)
-│       └── bulkResults.js        # compact scrollable bulk-password list
+│       ├── bulkResults.js        # compact scrollable bulk-password list
+│       └── libraryResults.js     # Favorites/Recent list (copy + similar + favorite-or-remove)
 └── test/
     ├── passwordGenerator.test.js
     ├── passwordStrength.test.js
@@ -183,7 +230,11 @@ Password Generator - Chrome Extension/
     ├── pronounceablePassword.test.js
     ├── themePassword.test.js
     ├── bulkGenerator.test.js
-    └── usernameGenerator.test.js
+    ├── usernameGenerator.test.js
+    ├── passwordLibrary.test.js
+    ├── similarPassword.test.js
+    ├── comparePasswords.test.js
+    └── exportPasswords.test.js
 ```
 
 ## Running tests
@@ -219,9 +270,18 @@ functionality without breaking what came before.
   missing `role="alert"` on warning banners), removal of leftover dead
   CSS, and a full regression pass across every feature from every
   phase.
+- **Phase 5.1 — Smart Productivity** — Favorites and Recent Passwords
+  (Tools screen), Generate Similar (a fresh password matching an
+  existing one's length and character mix), Compare Passwords (new
+  Checker mode), TXT/CSV export for Favorites/Recent, and in-popup
+  keyboard shortcuts (G/C/F on the Generator screen). This is the one
+  phase that changes the privacy model described above — see Privacy &
+  security for exactly what that means and how to opt out of it.
 
 ## Roadmap
 
-Future phases may add password history, cloud sync, autofill, account
-login, and full password-manager functionality. These remain
-intentionally out of scope for now.
+Future phases may add cloud sync, autofill, account login, and full
+password-manager functionality (linking saved passwords to sites,
+encrypted vaults, etc.). These remain intentionally out of scope for
+now — Favorites/Recent are a lightweight local convenience, not a
+password manager.
