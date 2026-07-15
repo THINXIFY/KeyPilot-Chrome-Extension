@@ -12,6 +12,8 @@ import { generateMemorable, generateOneMemorable } from '../lib/memorablePasswor
 import { generatePassphrase, generateOnePassphrase } from '../lib/passphrase.js';
 import { generatePronounceable, generateOnePronounceable } from '../lib/pronounceablePassword.js';
 import { generateThemed, generateOneThemed } from '../lib/themePassword.js';
+import { analyzePassword, generateStrongerPassword } from '../lib/passwordChecker.js';
+import { getPresetSettings } from '../lib/presets.js';
 import { showToast } from '../components/toast.js';
 import { updateStrengthMeter } from '../components/strengthMeter.js';
 import { renderSuggestions } from '../components/smartResults.js';
@@ -33,6 +35,7 @@ const toggleInputs = {
 };
 const excludeSimilarInput = document.getElementById('toggle-exclude-similar');
 const excludeCharsInput = document.getElementById('exclude-chars-input');
+const presetBtns = Array.from(document.querySelectorAll('.preset-btn'));
 
 const smartModeSelect = document.getElementById('smart-mode-select');
 const modePanels = {
@@ -60,6 +63,18 @@ const smartResultsActions = document.getElementById('smart-results-actions');
 const smartCopyAllBtn = document.getElementById('smart-copy-all-btn');
 const smartRefreshAllBtn = document.getElementById('smart-refresh-all-btn');
 const smartResults = document.getElementById('smart-results');
+
+const checkerInput = document.getElementById('checker-input');
+const checkerToggleBtn = document.getElementById('checker-toggle-btn');
+const checkerEmpty = document.getElementById('checker-empty');
+const checkerResultsEl = document.getElementById('checker-results');
+const checkerStrengthSection = document.getElementById('checker-strength');
+const checkerScoreValue = document.getElementById('checker-score-value');
+const checkerCrackValue = document.getElementById('checker-crack-value');
+const checkerWeaknessesList = document.getElementById('checker-weaknesses-list');
+const checkerTipsList = document.getElementById('checker-tips-list');
+const checkerGenerateBtn = document.getElementById('checker-generate-btn');
+const checkerSuggestionResults = document.getElementById('checker-suggestion-results');
 
 const navItems = {
   generator: document.getElementById('nav-generator'),
@@ -151,13 +166,19 @@ function persistSettings() {
   }, 300);
 }
 
+function clearActivePreset() {
+  presetBtns.forEach((btn) => btn.classList.remove('preset-btn--active'));
+}
+
 function handleToggleChange() {
+  clearActivePreset();
   readTogglesIntoSettings();
   renderPassword();
   persistSettings();
 }
 
 function handleLengthInputChange() {
+  clearActivePreset();
   settings.length = clampLength(lengthInput.value);
   lengthInput.value = settings.length;
   lengthSlider.value = settings.length;
@@ -166,10 +187,22 @@ function handleLengthInputChange() {
 }
 
 function handleLengthSliderInput() {
+  clearActivePreset();
   settings.length = Number.parseInt(lengthSlider.value, 10);
   lengthInput.value = settings.length;
   renderPassword();
   persistSettings();
+}
+
+function handlePresetSelect(btn) {
+  const presetSettings = getPresetSettings(btn.dataset.preset);
+  if (!presetSettings) return;
+
+  settings = { ...settings, ...presetSettings };
+  applySettingsToControls();
+  renderPassword();
+  persistSettings();
+  presetBtns.forEach((b) => b.classList.toggle('preset-btn--active', b === btn));
 }
 
 const COPY_LABEL = 'Copy';
@@ -306,6 +339,64 @@ async function handleCopyAll() {
   }
 }
 
+function renderCheckerList(listEl, items, emptyMessage) {
+  listEl.innerHTML = '';
+
+  if (items.length === 0) {
+    const li = document.createElement('li');
+    li.className = 'checker-list__item checker-list__item--positive';
+    li.textContent = emptyMessage;
+    listEl.appendChild(li);
+    return;
+  }
+
+  items.forEach((text) => {
+    const li = document.createElement('li');
+    li.className = 'checker-list__item';
+    li.textContent = text;
+    listEl.appendChild(li);
+  });
+}
+
+function runCheckerAnalysis() {
+  const password = checkerInput.value;
+
+  if (!password) {
+    checkerEmpty.hidden = false;
+    checkerResultsEl.hidden = true;
+    checkerSuggestionResults.innerHTML = '';
+    return;
+  }
+
+  const analysis = analyzePassword(password);
+  checkerEmpty.hidden = true;
+  checkerResultsEl.hidden = false;
+
+  updateStrengthMeter(checkerStrengthSection, { label: analysis.label, length: analysis.length });
+
+  checkerScoreValue.textContent = `${analysis.score}/100`;
+  checkerScoreValue.className = `checker-stat__value checker-stat__value--${analysis.label.toLowerCase()}`;
+  checkerCrackValue.textContent = analysis.crackTime;
+
+  renderCheckerList(checkerWeaknessesList, analysis.weaknesses, 'No significant weaknesses detected — nice work!');
+  renderCheckerList(checkerTipsList, analysis.tips, 'This password looks strong. No changes needed.');
+}
+
+function handleCheckerToggleVisibility() {
+  const isHidden = checkerInput.type === 'password';
+  checkerInput.type = isHidden ? 'text' : 'password';
+  checkerToggleBtn.textContent = isHidden ? 'Hide' : 'Show';
+  checkerToggleBtn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+}
+
+function handleCheckerGenerate() {
+  const password = generateStrongerPassword();
+  renderSuggestions(checkerSuggestionResults, [password], {
+    onCopy: handleSuggestionCopy,
+    onRegenerate: generateStrongerPassword,
+  });
+}
+
 function handleSeparatorChange(btn) {
   activeSeparator = btn.dataset.separator;
   separatorBtns.forEach((b) => b.classList.toggle('separator-btn--active', b === btn));
@@ -333,6 +424,7 @@ async function init() {
   toggleInputs.symbols.addEventListener('change', handleToggleChange);
   excludeSimilarInput.addEventListener('change', handleToggleChange);
   excludeCharsInput.addEventListener('input', handleToggleChange);
+  presetBtns.forEach((btn) => btn.addEventListener('click', () => handlePresetSelect(btn)));
 
   const savedSmartMode = await loadSmartMode();
   smartModeSelect.value = savedSmartMode;
@@ -347,6 +439,10 @@ async function init() {
 
   separatorBtns.forEach((btn) => btn.addEventListener('click', () => handleSeparatorChange(btn)));
   themeBtns.forEach((btn) => btn.addEventListener('click', () => handleThemeChange(btn)));
+
+  checkerInput.addEventListener('input', runCheckerAnalysis);
+  checkerToggleBtn.addEventListener('click', handleCheckerToggleVisibility);
+  checkerGenerateBtn.addEventListener('click', handleCheckerGenerate);
 
   Object.keys(navItems).forEach((key) => {
     navItems[key].addEventListener('click', () => switchScreen(key));

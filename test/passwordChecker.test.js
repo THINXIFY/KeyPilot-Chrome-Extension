@@ -25,6 +25,14 @@ test('crackTime is a non-empty human-readable string', () => {
   assert.ok(result.crackTime.length > 0);
 });
 
+test('crackTime pluralizes "centuries" correctly, not "centurys"', () => {
+  const result = analyzePassword('K9#mZq2$vLp7@wRxT4nB8!eF');
+  assert.ok(!result.crackTime.includes('centurys'), `bad pluralization: ${result.crackTime}`);
+  if (result.crackTime.includes('century') || result.crackTime.includes('centuries')) {
+    assert.ok(/centuries$/.test(result.crackTime) || result.crackTime === '1 century', result.crackTime);
+  }
+});
+
 test('flags a common password with a low score', () => {
   const result = analyzePassword('password123');
   assert.ok(result.weaknesses.includes('This is a commonly used password'));

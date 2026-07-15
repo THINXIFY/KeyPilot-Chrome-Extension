@@ -52,19 +52,19 @@ function formatDuration(seconds) {
   if (centuries >= 1000) return 'Over 1,000 centuries';
 
   const units = [
-    ['century', SECONDS_PER_CENTURY],
-    ['year', 365.25 * 24 * 3600],
-    ['month', 30 * 24 * 3600],
-    ['day', 24 * 3600],
-    ['hour', 3600],
-    ['minute', 60],
-    ['second', 1],
+    ['century', 'centuries', SECONDS_PER_CENTURY],
+    ['year', 'years', 365.25 * 24 * 3600],
+    ['month', 'months', 30 * 24 * 3600],
+    ['day', 'days', 24 * 3600],
+    ['hour', 'hours', 3600],
+    ['minute', 'minutes', 60],
+    ['second', 'seconds', 1],
   ];
 
-  for (const [name, unitSeconds] of units) {
+  for (const [singular, plural, unitSeconds] of units) {
     if (seconds >= unitSeconds) {
       const value = Math.round(seconds / unitSeconds);
-      return `${value.toLocaleString()} ${name}${value === 1 ? '' : 's'}`;
+      return `${value.toLocaleString()} ${value === 1 ? singular : plural}`;
     }
   }
 
