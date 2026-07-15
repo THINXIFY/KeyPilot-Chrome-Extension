@@ -274,13 +274,13 @@
       <p class="screen__subtitle">Generate multiple passwords or usernames at once.</p>
 
       <div class="field">
-        <label class="field__label" for="tools-mode-select">Mode</label>
-        <select id="tools-mode-select" class="select">
-          <option value="bulk">Bulk Passwords</option>
-          <option value="username">Username Generator</option>
-          <option value="favorites">Favorites</option>
-          <option value="recent">Recent Passwords</option>
-        </select>
+        <span class="field__label" id="tools-mode-label">Mode</span>
+        <div class="mode-chip-group" role="group" aria-labelledby="tools-mode-label">
+          <button type="button" class="mode-chip mode-chip--active" data-tools-mode="bulk">Bulk Passwords</button>
+          <button type="button" class="mode-chip" data-tools-mode="username">Username Generator</button>
+          <button type="button" class="mode-chip" data-tools-mode="favorites">Favorites</button>
+          <button type="button" class="mode-chip" data-tools-mode="recent">Recent Passwords</button>
+        </div>
       </div>
 
       <div id="panel-bulk" class="mode-panel">
@@ -297,6 +297,19 @@
       </div>
 
       <div id="panel-username" class="mode-panel" hidden>
+        <p class="mode-panel__hint">Leave the field blank for random inspiration, or enter a name or word to personalize your usernames.</p>
+        <div class="field">
+          <label class="field__label" for="username-custom-input">Custom name or word (optional)</label>
+          <input
+            id="username-custom-input"
+            class="field__input"
+            type="text"
+            placeholder="e.g. Sarah, Alex, or any word"
+            autocomplete="off"
+            spellcheck="false"
+            maxlength="20"
+          />
+        </div>
         <span class="field__label">Style</span>
         <div class="style-grid" role="group" aria-label="Username style">
           <button type="button" class="theme-btn theme-btn--active" data-username-style="professional">Professional</button>

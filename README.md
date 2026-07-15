@@ -55,12 +55,24 @@ configurable defaults — without ever sending your data anywhere.
   never is
 
 **Tools**
+- A pill-style **Mode** chip selector (Bulk Passwords, Username
+  Generator, Favorites, Recent Passwords) with hover, press, and
+  selection animations
 - **Bulk Passwords** — generate 10, 25, 50, or 100 passwords at once
   using your current Generator settings, shown as a compact scrollable
   list with per-password **Copy** plus **Copy All** / **Refresh All**
 - **Username Generator** — 5 suggestions per generate in 4 styles
   (Professional, Minimal, Gaming, Developer), each with its own
   **Copy** and **Regenerate**
+- **Custom Username mode** — type any name, nickname, or word into the
+  optional field and get 6 unique suggestions built from it instead of
+  a random word, in the same 4 styles. Professional/Minimal keep your
+  word intact with digits (and Gaming/Developer blend it with a
+  creative flavor word as a prefix or suffix) — never a raw,
+  predictable copy of what you typed. Leave the field blank to fall
+  back to fully random suggestions. **Copy**, **Regenerate**, and
+  **Copy All** all work the same as the random modes; the word you
+  type is never saved
 - **Favorites** — every password you've starred, newest first, with a
   **Password Health Score** badge (Weak/Fair/Strong/Excellent), **Copy**,
   **Generate Similar** (a fresh password with the same length and
@@ -109,9 +121,10 @@ configurable defaults — without ever sending your data anywhere.
   no analytics, and no external services anywhere in the extension.
   There is no account, no login, and no cloud sync of any kind.
 - **Typed input is never saved, tracked, or transmitted**: the
-  password you check or compare on the Checker screen, and any
-  name/word you type into Smart Password, exist only in memory for as
-  long as the popup is open and are gone the moment you close it.
+  password you check or compare on the Checker screen, any name/word
+  you type into Smart Password, and any custom name/word you type into
+  the Tools Username Generator, exist only in memory for as long as
+  the popup is open and are gone the moment you close it.
 - **Favorites and Recent Passwords are the one deliberate exception**:
   when you tap **☆ Favorite** on a password, or copy any single
   password anywhere in the app, that password's plaintext value *is*
@@ -173,14 +186,15 @@ configurable defaults — without ever sending your data anywhere.
    for that mode, and click **Generate Suggestions** to get 5 secure
    suggestions. Use **Copy**, **Regenerate**, or **☆** on any single
    suggestion, or **Copy All** / **Refresh All** for the whole set.
-5. On **Tools**: choose **Bulk Passwords** to generate 10–100 passwords
-   at once using your current Generator settings, **Username
-   Generator** for 5 suggestions in a Professional, Minimal, Gaming, or
-   Developer style, **Favorites** for everything you've starred, or
-   **Recent Passwords** for your last 20 copies. Favorites and Recent
-   entries show a health score and an **Improve** button appears on
-   anything Weak/Fair; both lists support **Export TXT/CSV** and
-   **Clear**.
+5. On **Tools**: pick a **Mode** chip — **Bulk Passwords** to generate
+   10–100 passwords at once using your current Generator settings,
+   **Username Generator** for 5 random suggestions (or type a name,
+   nickname, or word into the optional field for 6 personalized ones)
+   in a Professional, Minimal, Gaming, or Developer style, **Favorites**
+   for everything you've starred, or **Recent Passwords** for your last
+   20 copies. Favorites and Recent entries show a health score and an
+   **Improve** button appears on anything Weak/Fair; both lists support
+   **Export TXT/CSV** and **Clear**.
 6. On **Checker**: switch between **Check Password** (strength,
    security score, estimated crack time, weaknesses and tips, plus
    **Generate Stronger Password**) and **Compare Passwords** (two
@@ -216,7 +230,7 @@ Password Generator - Chrome Extension/
 │   │   ├── pronounceablePassword.js # Pronounceable mode
 │   │   ├── themePassword.js        # Theme-Based mode
 │   │   ├── bulkGenerator.js        # Bulk password generation (10/25/50/100)
-│   │   ├── usernameGenerator.js    # Username generation (4 styles)
+│   │   ├── usernameGenerator.js    # Username generation (4 styles, random + custom word)
 │   │   ├── passwordLibrary.js      # Favorites/Recent chrome.storage.local wrapper
 │   │   ├── similarPassword.js      # Generate Similar (matches length + character profile)
 │   │   ├── comparePasswords.js     # Compare Passwords analysis + winner
@@ -320,6 +334,17 @@ functionality without breaking what came before.
     Privacy and About cards still said passwords are "never saved
     either way" — stale since Phase 5.1 shipped Favorites/Recent;
     corrected to match the README.
+- **Phase 5.3 — Tools Polish & Custom Usernames**:
+  - The Tools screen's **Mode** selector moved from a native dropdown
+    to a pill-style chip group, with hover/press/selection animations
+    and a 2-column layout for clearer visual hierarchy.
+  - **Custom Username mode**: an optional text field on the Username
+    Generator lets you type a name, nickname, or word; suggestions are
+    built from that word instead of a random pick, still in the same
+    4 styles, still never saved. Leaving it blank keeps the original
+    random behavior unchanged.
+  - The header logo (`.app__logo`) was reduced from 190px to 130px max
+    width for a less dominant, more balanced header.
 
 ## Roadmap
 

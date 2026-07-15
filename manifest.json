@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "KeyPilot",
   "short_name": "KeyPilot",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Generate secure passwords, passphrases, and usernames, and check password strength — entirely offline.",
   "icons": {
     "16": "icon16.png",

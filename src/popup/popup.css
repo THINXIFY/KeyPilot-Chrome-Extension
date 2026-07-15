@@ -64,7 +64,7 @@ body {
 .app__logo {
   display: block;
   width: 100%;
-  max-width: 190px;
+  max-width: 130px;
   height: auto;
 }
 
@@ -583,6 +583,86 @@ body {
   background-repeat: no-repeat, no-repeat;
   background-position: right var(--space-3) center, left 11px center;
   background-size: 16px, 16px;
+}
+
+.mode-chip-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.mode-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px solid var(--color-card-border);
+  border-radius: 999px;
+  background: var(--color-card-bg);
+  color: var(--color-text-muted);
+  padding: 10px var(--space-3);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: transform var(--transition-fast), border-color var(--transition-fast),
+    color var(--transition-fast), background-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.mode-chip:hover {
+  border-color: var(--color-primary);
+  color: var(--color-heading);
+  transform: translateY(-1px);
+}
+
+.mode-chip:active {
+  transform: scale(0.96);
+}
+
+.mode-chip:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.mode-chip--active {
+  background: var(--gradient-primary);
+  border-color: transparent;
+  color: var(--color-heading);
+  box-shadow: 0 4px 14px rgba(0, 87, 255, 0.35);
+  animation: mode-chip-select 260ms ease;
+}
+
+.mode-chip--active:hover {
+  transform: none;
+}
+
+@keyframes mode-chip-select {
+  0% {
+    transform: scale(0.94);
+  }
+  60% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mode-chip {
+    transition: border-color var(--transition-fast), color var(--transition-fast),
+      background-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+
+  .mode-chip:hover {
+    transform: none;
+  }
+
+  .mode-chip--active {
+    animation: none;
+  }
 }
 
 .mode-panel {

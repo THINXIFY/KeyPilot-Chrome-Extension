@@ -13,7 +13,12 @@ import { generatePronounceable, generateOnePronounceable } from '../lib/pronounc
 import { generateThemed, generateOneThemed } from '../lib/themePassword.js';
 import { analyzePassword, generateStrongerPassword } from '../lib/passwordChecker.js';
 import { getPresetSettings } from '../lib/presets.js';
-import { generateUsernames, generateOneUsername } from '../lib/usernameGenerator.js';
+import {
+  generateUsernames,
+  generateOneUsername,
+  generateCustomUsernames,
+  generateOneCustomUsername,
+} from '../lib/usernameGenerator.js';
 import { generateBulk } from '../lib/bulkGenerator.js';
 import { generateSimilarPassword } from '../lib/similarPassword.js';
 import { comparePasswords } from '../lib/comparePasswords.js';
@@ -94,7 +99,7 @@ const smartCopyAllBtn = document.getElementById('smart-copy-all-btn');
 const smartRefreshAllBtn = document.getElementById('smart-refresh-all-btn');
 const smartResults = document.getElementById('smart-results');
 
-const toolsModeSelect = document.getElementById('tools-mode-select');
+const toolsModeChips = Array.from(document.querySelectorAll('.mode-chip'));
 const toolsModePanels = {
   bulk: document.getElementById('panel-bulk'),
   username: document.getElementById('panel-username'),
@@ -103,8 +108,10 @@ const toolsModePanels = {
 };
 const quantityBtns = Array.from(document.querySelectorAll('#panel-bulk .separator-btn'));
 const styleBtns = Array.from(document.querySelectorAll('#panel-username .theme-btn'));
+const usernameCustomInput = document.getElementById('username-custom-input');
 const toolsGenerateBtn = document.getElementById('tools-generate-btn');
 const toolsWarning = document.getElementById('tools-warning');
+const toolsWarningDefaultText = toolsWarning ? toolsWarning.textContent.trim() : '';
 const toolsResultsActions = document.getElementById('tools-results-actions');
 const toolsCopyAllBtn = document.getElementById('tools-copy-all-btn');
 const toolsRefreshAllBtn = document.getElementById('tools-refresh-all-btn');
@@ -587,7 +594,9 @@ function handleStyleSelect(btn) {
 
 function switchToolsMode(mode) {
   activeToolsMode = mode;
-  toolsModeSelect.value = mode;
+  toolsModeChips.forEach((chip) => {
+    chip.classList.toggle('mode-chip--active', chip.dataset.toolsMode === mode);
+  });
   Object.keys(toolsModePanels).forEach((key) => {
     toolsModePanels[key].hidden = key !== mode;
   });
@@ -608,6 +617,7 @@ function switchToolsMode(mode) {
   toolsResultsActions.hidden = true;
   toolsLibraryActions.hidden = true;
   toolsWarning.hidden = true;
+  toolsWarning.textContent = toolsWarningDefaultText;
 
   if (isLibraryMode) {
     refreshLibraryPanel();
@@ -619,6 +629,7 @@ function handleToolsGenerate() {
     const passwords = generateBulk(settings, activeQuantity);
 
     if (!passwords) {
+      toolsWarning.textContent = toolsWarningDefaultText;
       toolsWarning.hidden = false;
       toolsResultsActions.hidden = true;
       bulkResultsEl.hidden = true;
@@ -636,7 +647,20 @@ function handleToolsGenerate() {
   }
 
   if (activeToolsMode === 'username') {
-    const usernames = generateUsernames(activeUsernameStyle);
+    const customWord = usernameCustomInput.value.trim();
+    const usernames = customWord
+      ? generateCustomUsernames(customWord, activeUsernameStyle)
+      : generateUsernames(activeUsernameStyle);
+
+    if (!usernames) {
+      toolsWarning.textContent = 'Enter a valid name or word using letters and numbers, or clear the field to generate random usernames.';
+      toolsWarning.hidden = false;
+      toolsResultsActions.hidden = true;
+      usernameResultsEl.hidden = true;
+      usernameResultsEl.innerHTML = '';
+      return;
+    }
+
     toolsWarning.hidden = true;
     toolsResultsActions.hidden = false;
     bulkResultsEl.hidden = true;
@@ -644,7 +668,12 @@ function handleToolsGenerate() {
     usernameResultsEl.hidden = false;
     renderUsernames(usernameResultsEl, usernames, {
       onCopy: copyPassword,
-      onRegenerate: () => generateOneUsername(activeUsernameStyle),
+      onRegenerate: () => {
+        const liveWord = usernameCustomInput.value.trim();
+        return liveWord
+          ? generateOneCustomUsername(liveWord, activeUsernameStyle)
+          : generateOneUsername(activeUsernameStyle);
+      },
     });
   }
 }
@@ -846,7 +875,7 @@ async function init() {
   compareToggleB.addEventListener('click', () => handleCompareToggleVisibility(compareInputB, compareToggleB));
 
   switchToolsMode(activeToolsMode);
-  toolsModeSelect.addEventListener('change', () => switchToolsMode(toolsModeSelect.value));
+  toolsModeChips.forEach((chip) => chip.addEventListener('click', () => switchToolsMode(chip.dataset.toolsMode)));
   quantityBtns.forEach((btn) => btn.addEventListener('click', () => handleQuantitySelect(btn)));
   styleBtns.forEach((btn) => btn.addEventListener('click', () => handleStyleSelect(btn)));
   toolsGenerateBtn.addEventListener('click', handleToolsGenerate);
