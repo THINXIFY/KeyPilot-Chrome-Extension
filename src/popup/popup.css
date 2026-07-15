@@ -58,33 +58,14 @@ body {
 .app__header {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  padding-bottom: var(--space-2);
 }
 
-.logo {
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
-}
-
-.app__titles {
-  display: flex;
-  flex-direction: column;
-}
-
-.app__title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--color-heading);
-  letter-spacing: -0.01em;
-}
-
-.app__subtitle {
-  margin: 2px 0 0;
-  font-size: 12px;
-  color: var(--color-text-muted);
+.app__logo {
+  display: block;
+  width: 100%;
+  max-width: 190px;
+  height: auto;
 }
 
 .app__nav {
@@ -1145,4 +1126,34 @@ body {
 
 .password-output.is-updating {
   animation: fade-scale-in var(--transition-med);
+}
+
+.app__footer {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-card-border);
+  text-align: center;
+}
+
+.app__footer-text {
+  margin: 0;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.app__footer-link {
+  color: var(--color-text);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.app__footer-link:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.app__footer-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
 }

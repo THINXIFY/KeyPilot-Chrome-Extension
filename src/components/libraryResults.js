@@ -1,3 +1,7 @@
+import { getSuggestionStrength } from '../lib/smartPassword.js';
+
+const NEEDS_IMPROVEMENT_LABELS = new Set(['Weak', 'Fair']);
+
 function formatRelativeTime(timestamp) {
   if (!timestamp) return '';
   const minutes = Math.floor((Date.now() - timestamp) / 60000);
@@ -10,7 +14,9 @@ function formatRelativeTime(timestamp) {
 }
 
 export function renderLibraryList(container, entries, options) {
-  const { emptyMessage, isFavoriteMode, onCopy, onGenerateSimilar, onToggleFavorite, onRemove } = options;
+  const {
+    emptyMessage, isFavoriteMode, onCopy, onGenerateSimilar, onImprove, onToggleFavorite, onRemove,
+  } = options;
 
   container.innerHTML = '';
 
@@ -34,6 +40,12 @@ export function renderLibraryList(container, entries, options) {
 
     const row = document.createElement('div');
     row.className = 'suggestion-card__row';
+
+    const meta = document.createElement('div');
+    meta.className = 'suggestion-card__meta';
+
+    const healthEl = document.createElement('span');
+    healthEl.className = 'suggestion-card__strength';
 
     const timeEl = document.createElement('span');
     timeEl.className = 'suggestion-card__length';
@@ -63,14 +75,39 @@ export function renderLibraryList(container, entries, options) {
     similarBtn.className = 'suggestion-card__btn suggestion-card__btn--secondary';
     similarBtn.textContent = 'Similar';
     similarBtn.setAttribute('aria-label', 'Generate a similar password');
+
+    const improveBtn = document.createElement('button');
+    improveBtn.type = 'button';
+    improveBtn.className = 'suggestion-card__btn suggestion-card__btn--secondary';
+    improveBtn.textContent = 'Improve';
+    improveBtn.setAttribute('aria-label', 'Generate a stronger replacement');
+
+    function applyHealth() {
+      const { label } = getSuggestionStrength(password);
+      healthEl.textContent = label;
+      healthEl.className = `suggestion-card__strength suggestion-card__strength--${label.toLowerCase()}`;
+      improveBtn.hidden = !NEEDS_IMPROVEMENT_LABELS.has(label);
+    }
+
     similarBtn.addEventListener('click', () => {
       const next = onGenerateSimilar(password);
       if (!next) return;
       password = next;
       textEl.textContent = password;
+      applyHealth();
     });
 
-    actions.append(copyBtn, similarBtn);
+    improveBtn.addEventListener('click', () => {
+      const next = onImprove(password);
+      if (!next) return;
+      password = next;
+      textEl.textContent = password;
+      applyHealth();
+    });
+
+    applyHealth();
+    meta.append(healthEl, timeEl);
+    actions.append(copyBtn, similarBtn, improveBtn);
 
     if (isFavoriteMode) {
       const removeBtn = document.createElement('button');
@@ -97,7 +134,7 @@ export function renderLibraryList(container, entries, options) {
       actions.append(favBtn);
     }
 
-    row.append(timeEl, actions);
+    row.append(meta, actions);
     card.append(textEl, row);
     container.appendChild(card);
   });

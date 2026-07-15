@@ -62,6 +62,8 @@ const toggleInputs = {
   symbols: document.getElementById('toggle-symbols'),
 };
 const excludeSimilarInput = document.getElementById('toggle-exclude-similar');
+const avoidRepeatedInput = document.getElementById('toggle-avoid-repeated');
+const avoidSequentialInput = document.getElementById('toggle-avoid-sequential');
 const excludeCharsInput = document.getElementById('exclude-chars-input');
 const presetSelect = document.getElementById('preset-select');
 
@@ -191,6 +193,8 @@ function applySettingsToControls() {
   toggleInputs.numbers.checked = settings.numbers;
   toggleInputs.symbols.checked = settings.symbols;
   excludeSimilarInput.checked = settings.excludeSimilar;
+  avoidRepeatedInput.checked = settings.avoidRepeated;
+  avoidSequentialInput.checked = settings.avoidSequential;
   excludeCharsInput.value = settings.excludeChars;
 }
 
@@ -202,6 +206,8 @@ function readTogglesIntoSettings() {
     numbers: toggleInputs.numbers.checked,
     symbols: toggleInputs.symbols.checked,
     excludeSimilar: excludeSimilarInput.checked,
+    avoidRepeated: avoidRepeatedInput.checked,
+    avoidSequential: avoidSequentialInput.checked,
     excludeChars: excludeCharsInput.value,
   };
 }
@@ -657,6 +663,7 @@ async function refreshLibraryPanel() {
       : 'Nothing copied yet. Passwords you copy will show up here.',
     onCopy: copyPassword,
     onGenerateSimilar: generateSimilarPassword,
+    onImprove: () => generateStrongerPassword(),
     onToggleFavorite: async (password) => {
       await addFavorite(password);
       showToast(app, 'Added to Favorites', 'success');
@@ -808,6 +815,8 @@ async function init() {
   toggleInputs.numbers.addEventListener('change', handleToggleChange);
   toggleInputs.symbols.addEventListener('change', handleToggleChange);
   excludeSimilarInput.addEventListener('change', handleToggleChange);
+  avoidRepeatedInput.addEventListener('change', handleToggleChange);
+  avoidSequentialInput.addEventListener('change', handleToggleChange);
   excludeCharsInput.addEventListener('input', handleToggleChange);
   presetSelect.addEventListener('change', handlePresetSelect);
 
