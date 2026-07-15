@@ -91,6 +91,38 @@ security toolkit.
   transmitted — it exists only in memory for as long as the popup is
   open, exactly like every other input in the app
 
+**Phase 3 UI refinement**
+- Redesigned the Generator screen and preset dropdown for a more
+  premium feel: the password card is the clear focal point (bigger
+  font, ambient glow, hover lift, a brief pulse on generate), Presets/
+  Length/Character Types are grouped into one quieter settings card,
+  and section labels use a small uppercase "eyebrow" style shared
+  across every screen
+- Pure presentation change — no functional difference from Phase 3
+
+**Phase 4.1 — Productivity & Settings**
+- New **Tools** tab with a mode selector:
+  - **Bulk Passwords**: generate 10, 25, 50, or 100 passwords at once
+    using your current Generator settings (length, character types),
+    shown as a compact scrollable list with a **Copy** button per
+    password plus **Copy All** / **Refresh All**
+  - **Username Generator**: 5 suggestions per generate in 4 styles —
+    **Professional**, **Minimal**, **Gaming**, and **Developer** — each
+    with its own **Copy** and **Regenerate**
+- **Settings** tab is now fully built out:
+  - **Default length** and **default Smart mode** are directly bound to
+    the same settings used by the Generator and Smart screens — change
+    it from either place and both stay in sync
+  - **Remember my preferences** toggle: turning it off stops KeyPilot
+    from saving length/character-type/mode preferences going forward
+    *and* clears anything already saved; turning it back on resumes
+    saving. Passwords and personal input are never saved either way,
+    on or off
+  - **Reset All Settings** restores every default and clears all
+    locally stored preferences in one click
+  - **About** card showing the installed version (read live from the
+    extension manifest) and a plain-language privacy statement
+
 ## Installation (load unpacked)
 
 1. Open `chrome://extensions` in Chrome.
@@ -104,10 +136,9 @@ security toolkit.
 
 1. Click the KeyPilot toolbar icon to open the popup.
 2. Use the top navigation to switch between **Generator**, **Smart**,
-   **Checker**, and **Settings**. Settings is still a placeholder for a
-   future phase.
+   **Tools**, **Checker**, and **Settings**.
 3. On **Generator**: a password is generated automatically using your
-   last-used settings. Tap a **preset** (Banking, Email, Social, Work,
+   last-used settings. Pick a **preset** (Banking, Email, Social, Work,
    Gaming, Developer) to instantly apply a recommended configuration, or
    adjust the length (slider or number field) and character types
    yourself — the password regenerates automatically as you change
@@ -123,11 +154,21 @@ security toolkit.
    suggestions. Use **Copy** or **Regenerate** on any single suggestion,
    or **Copy All** / **Refresh All** for the whole set. The mode you
    last used is remembered the next time you open the popup.
-5. On **Checker**: type or paste a password to see its strength, security
+5. On **Tools**: choose **Bulk Passwords** to generate 10–100 passwords
+   at once using your current Generator settings, or **Username
+   Generator** to get 5 suggestions in a Professional, Minimal, Gaming,
+   or Developer style. Copy individual results or use **Copy All** /
+   **Refresh All**.
+6. On **Checker**: type or paste a password to see its strength, security
    score, estimated crack time, and a list of weaknesses with tips to fix
    them. Use the **Show/Hide** button to reveal or mask what you typed,
    and click **Generate Stronger Password** for a ready-to-use, secure
    alternative.
+7. On **Settings**: set your default length and default Smart mode
+   (these are the same settings used elsewhere, kept in sync), toggle
+   whether KeyPilot remembers your preferences on this device, reset
+   everything to defaults, or check the About card for the installed
+   version and privacy statement.
 
 ## Project structure
 
@@ -145,12 +186,14 @@ Password Generator - Chrome Extension/
 │   │   ├── passwordStrength.js     # pure strength estimation
 │   │   ├── passwordChecker.js      # password analysis + stronger-password generation
 │   │   ├── presets.js              # 6 security presets (Banking, Email, Social, ...)
-│   │   ├── settingsStorage.js      # chrome.storage.local wrapper (settings + smart mode)
+│   │   ├── settingsStorage.js      # chrome.storage.local wrapper (settings, smart mode, remember flag)
 │   │   ├── smartPassword.js        # From Name / From Words suggestion generation
 │   │   ├── memorablePassword.js    # Memorable mode
 │   │   ├── passphrase.js           # Passphrase mode
 │   │   ├── pronounceablePassword.js # Pronounceable mode
 │   │   ├── themePassword.js        # Theme-Based mode
+│   │   ├── bulkGenerator.js        # Bulk password generation (10/25/50/100)
+│   │   ├── usernameGenerator.js    # Username generation (4 styles)
 │   │   ├── randomUtils.js          # shared crypto-random helpers
 │   │   ├── charsets.js             # shared digit/symbol charsets
 │   │   ├── wordLists.js            # shared common + per-theme word lists
@@ -158,7 +201,9 @@ Password Generator - Chrome Extension/
 │   └── components/
 │       ├── toast.js              # reusable toast notification
 │       ├── strengthMeter.js      # strength bar + label + count
-│       └── smartResults.js       # suggestion cards (copy + regenerate)
+│       ├── smartResults.js       # suggestion cards (copy + regenerate)
+│       ├── usernameResults.js    # username cards (copy + regenerate, no strength/length)
+│       └── bulkResults.js        # compact scrollable bulk-password list
 ├── test/
 │   ├── passwordGenerator.test.js
 │   ├── passwordStrength.test.js
@@ -169,7 +214,9 @@ Password Generator - Chrome Extension/
 │   ├── memorablePassword.test.js
 │   ├── passphrase.test.js
 │   ├── pronounceablePassword.test.js
-│   └── themePassword.test.js
+│   ├── themePassword.test.js
+│   ├── bulkGenerator.test.js
+│   └── usernameGenerator.test.js
 └── icons/                        # reserved for future icon assets
 ```
 
@@ -185,6 +232,6 @@ npm test
 
 ## Roadmap
 
-Future phases may add password history, a username generator, autofill,
-account login, and full password-manager functionality. These remain
+Future phases may add password history, cloud sync, autofill, account
+login, and full password-manager functionality. These remain
 intentionally out of scope for now.
