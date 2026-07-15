@@ -12,12 +12,18 @@ configurable defaults — without ever sending your data anywhere.
   `Math.random`)
 - Length slider and manual numeric input (8–64 characters)
 - Independent toggles for uppercase, lowercase, numbers, and symbols
-- Advanced options: avoid similar-looking characters (`O`, `0`, `I`,
-  `l`, `1`) and exclude specific characters
+- Advanced options (filters): avoid similar-looking characters (`O`,
+  `0`, `I`, `l`, `1`), avoid repeated characters (`aaa`, `111`), avoid
+  sequential runs (`abc`, `123`), and exclude specific characters —
+  all enforced at generation time, not just flagged afterward
 - Live strength meter (Weak / Fair / Strong / Excellent) with character
   count
-- **Security presets** — Banking, Email, Social, Work, Gaming,
-  Developer — apply a recommended configuration in one click
+- **Security presets** (Password Policy Templates) — Banking, Email,
+  Social, Work, Gaming, Developer — apply a recommended length,
+  character mix, and filter combination in one click. The stricter
+  policies (Banking, Work, Developer) also turn on avoid-repeated and
+  avoid-sequential; Email avoids sequences only; Social and Gaming stay
+  relaxed
 - One-click **Copy** with toast + button confirmation, and a **☆
   Favorite** button to save the current password (see Favorites below)
 - Keyboard shortcuts while the Generator screen is focused and you're
@@ -55,13 +61,18 @@ configurable defaults — without ever sending your data anywhere.
 - **Username Generator** — 5 suggestions per generate in 4 styles
   (Professional, Minimal, Gaming, Developer), each with its own
   **Copy** and **Regenerate**
-- **Favorites** — every password you've starred, newest first, with
-  **Copy**, **Generate Similar** (a fresh password with the same
-  length and character mix, not a predictable tweak of the original),
-  and **Remove**
+- **Favorites** — every password you've starred, newest first, with a
+  **Password Health Score** badge (Weak/Fair/Strong/Excellent), **Copy**,
+  **Generate Similar** (a fresh password with the same length and
+  character mix, not a predictable tweak of the original), and
+  **Remove**
 - **Recent Passwords** — your last 20 copied passwords, tracked
-  automatically, with **Copy**, **Generate Similar**, and a **☆ Save**
-  button to promote one to Favorites
+  automatically, with the same health badge, **Copy**, **Generate
+  Similar**, and a **☆ Save** button to promote one to Favorites
+- **Improve** — an extra button that appears only on entries scored
+  Weak or Fair, generating a genuinely stronger replacement in place
+  (not just a same-profile variation like Similar); Strong/Excellent
+  entries stay uncluttered
 - Favorites and Recent both offer **Export TXT** / **Export CSV** (one
   password per line/row) and a one-click **Clear**
 
@@ -151,9 +162,10 @@ configurable defaults — without ever sending your data anywhere.
    Gaming, Developer) to instantly apply a recommended configuration,
    or adjust the length (slider or number field) and character types
    yourself — the password regenerates automatically as you change
-   options. Open **Advanced options** to avoid similar-looking
-   characters or exclude specific characters. Click **Generate** for a
-   new one, **Copy** to copy it, or **☆** to save it to Favorites.
+   options. Open **Advanced options** to avoid similar-looking,
+   repeated, or sequential characters, or to exclude specific
+   characters. Click **Generate** for a new one, **Copy** to copy it,
+   or **☆** to save it to Favorites.
    With the popup focused and no field selected, **G**/**C**/**F** do
    the same three things from the keyboard.
 4. On **Smart**: choose a **Mode** (From Name, From Words, Memorable,
@@ -166,7 +178,9 @@ configurable defaults — without ever sending your data anywhere.
    Generator** for 5 suggestions in a Professional, Minimal, Gaming, or
    Developer style, **Favorites** for everything you've starred, or
    **Recent Passwords** for your last 20 copies. Favorites and Recent
-   support **Export TXT/CSV** and **Clear**.
+   entries show a health score and an **Improve** button appears on
+   anything Weak/Fair; both lists support **Export TXT/CSV** and
+   **Clear**.
 6. On **Checker**: switch between **Check Password** (strength,
    security score, estimated crack time, weaknesses and tips, plus
    **Generate Stronger Password**) and **Compare Passwords** (two
@@ -207,7 +221,8 @@ Password Generator - Chrome Extension/
 │   │   ├── similarPassword.js      # Generate Similar (matches length + character profile)
 │   │   ├── comparePasswords.js     # Compare Passwords analysis + winner
 │   │   ├── exportPasswords.js      # TXT/CSV formatting + file download
-│   │   ├── randomUtils.js          # shared crypto-random helpers
+│   │   ├── passwordPatterns.js     # shared repeated/sequential-run detection
+│   │   ├── randomUtils.js          # shared crypto-random helpers (bias-free randomInt)
 │   │   ├── charsets.js             # shared digit/symbol charsets
 │   │   ├── wordLists.js            # shared common + per-theme word lists
 │   │   └── clipboard.js            # copy-to-clipboard helper
@@ -234,7 +249,9 @@ Password Generator - Chrome Extension/
     ├── passwordLibrary.test.js
     ├── similarPassword.test.js
     ├── comparePasswords.test.js
-    └── exportPasswords.test.js
+    ├── exportPasswords.test.js
+    ├── passwordPatterns.test.js
+    └── randomUtils.test.js
 ```
 
 ## Running tests
@@ -277,6 +294,32 @@ functionality without breaking what came before.
   keyboard shortcuts (G/C/F on the Generator screen). This is the one
   phase that changes the privacy model described above — see Privacy &
   security for exactly what that means and how to opt out of it.
+- **Phase 5.2 — Smart Security & Final Refinements**:
+  - **Avoid repeated / avoid sequential** join avoid-similar and custom
+    exclusions as generation-time filters (not just after-the-fact
+    detection), and the 6 security presets now configure them per
+    policy.
+  - **Password Health Score** and a conditional **Improve** button on
+    Favorites/Recent entries — Weak/Fair passwords get an upgrade path
+    right where they're stored; Strong/Excellent ones stay uncluttered.
+  - **Generation quality fix**: `randomInt()` used a plain `% max` on a
+    crypto-random 32-bit value — textbook modulo bias, where some
+    outputs become marginally more likely whenever `max` doesn't evenly
+    divide 2³². Fixed with rejection sampling. `passwordGenerator.js`
+    also turned out to still have its own pre-refactor duplicate
+    `randomInt`/`shuffle` (with the same bias) instead of using the
+    shared `randomUtils.js` — now consolidated onto the one fixed
+    implementation.
+  - **Header redesign**: the full `keypilot-logo.png` lockup (icon +
+    wordmark) replaces the small icon crop and the separate "KeyPilot"
+    heading/tagline text, with a visually-hidden `<h1>` preserving a
+    real document heading for screen readers.
+  - **Footer**: "Developed by THINXIFY.COM", linking to thinxify.com in
+    a new tab.
+  - Found and fixed via the screenshot audit: the Settings screen's
+    Privacy and About cards still said passwords are "never saved
+    either way" — stale since Phase 5.1 shipped Favorites/Recent;
+    corrected to match the README.
 
 ## Roadmap
 
