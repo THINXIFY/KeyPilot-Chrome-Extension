@@ -39,3 +39,19 @@ test('getPresetSettings returns a fresh copy each call', () => {
 test('getPresetSettings returns null for an unknown preset', () => {
   assert.equal(getPresetSettings('not-a-real-preset'), null);
 });
+
+test('every preset defines avoidRepeated and avoidSequential as booleans', () => {
+  for (const key of EXPECTED_KEYS) {
+    const { avoidRepeated, avoidSequential } = PRESETS[key].settings;
+    assert.equal(typeof avoidRepeated, 'boolean', `${key}.avoidRepeated should be a boolean`);
+    assert.equal(typeof avoidSequential, 'boolean', `${key}.avoidSequential should be a boolean`);
+  }
+});
+
+test('the stricter policies (Banking, Work, Developer) avoid both repeats and sequences', () => {
+  for (const key of ['banking', 'work', 'developer']) {
+    const { avoidRepeated, avoidSequential } = PRESETS[key].settings;
+    assert.equal(avoidRepeated, true, `${key} should avoid repeated characters`);
+    assert.equal(avoidSequential, true, `${key} should avoid sequential characters`);
+  }
+});
