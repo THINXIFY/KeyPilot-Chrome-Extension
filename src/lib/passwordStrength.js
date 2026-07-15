@@ -24,3 +24,13 @@ export function calculateStrength(options = {}) {
 
   return { bits, label: 'Excellent' };
 }
+
+export function estimateStrengthFromPassword(password) {
+  return calculateStrength({
+    length: password.length,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    numbers: /[0-9]/.test(password),
+    symbols: /[^A-Za-z0-9]/.test(password),
+  });
+}

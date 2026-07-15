@@ -1,47 +1,13 @@
-import { calculateStrength } from './passwordStrength.js';
+import { estimateStrengthFromPassword } from './passwordStrength.js';
+import { randomInt, shuffle, randomChars, pick } from './randomUtils.js';
+import { DIGITS, SYMBOLS } from './charsets.js';
+import { COMMON_WORDS } from './wordLists.js';
 
-const DIGITS = '0123456789';
-const SYMBOLS = '!@#$%^&*()-_=+[]{}<>?';
 const LEET_MAP = { a: '@', e: '3', i: '1', o: '0', s: '$' };
-
-const WORD_LIST = [
-  'river', 'tiger', 'lamp', 'cloud', 'stone', 'forest', 'harbor', 'maple', 'comet', 'falcon',
-  'meadow', 'granite', 'willow', 'copper', 'marble', 'thunder', 'breeze', 'canyon', 'lantern', 'orchid',
-  'summit', 'coral', 'glacier', 'ripple', 'quartz', 'ivory', 'cedar', 'ridge', 'delta', 'frost',
-  'pebble', 'beacon', 'violet', 'amber', 'cinder', 'dune', 'fern', 'grove', 'haven', 'iris',
-  'jungle', 'kestrel', 'lagoon', 'moss', 'nectar', 'opal', 'petal', 'quill', 'reef', 'sable',
-  'tundra', 'umber', 'vale', 'wren', 'yarrow', 'zephyr', 'ash', 'birch', 'ember', 'spark',
-];
 
 const MIN_SMART_LENGTH = 10;
 const DEFAULT_COUNT = 5;
 const MAX_ATTEMPTS_MULTIPLIER = 10;
-
-function randomInt(max) {
-  const buffer = new Uint32Array(1);
-  crypto.getRandomValues(buffer);
-  return buffer[0] % max;
-}
-
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = randomInt(i + 1);
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function randomDigits(n) {
-  return Array.from({ length: n }, () => DIGITS[randomInt(DIGITS.length)]).join('');
-}
-
-function randomSymbols(n) {
-  return Array.from({ length: n }, () => SYMBOLS[randomInt(SYMBOLS.length)]).join('');
-}
-
-function pickRandomWord() {
-  return WORD_LIST[randomInt(WORD_LIST.length)];
-}
 
 // Randomizes case and occasionally leet-substitutes letters, guaranteeing the
 // result differs from the original token so a raw name/word is never returned.
@@ -76,10 +42,10 @@ function transformToken(token) {
 function buildPassword(tokens, { includeRandomWord }) {
   const parts = tokens.map(transformToken);
   if (includeRandomWord) {
-    parts.push(transformToken(pickRandomWord()));
+    parts.push(transformToken(pick(COMMON_WORDS)));
   }
-  parts.push(randomDigits(2 + randomInt(3)));
-  parts.push(randomSymbols(1 + randomInt(2)));
+  parts.push(randomChars(DIGITS, 2 + randomInt(3)));
+  parts.push(randomChars(SYMBOLS, 1 + randomInt(2)));
 
   shuffle(parts);
   let password = parts.join('');
@@ -142,11 +108,5 @@ export function generateFromWords(words, count = DEFAULT_COUNT) {
 }
 
 export function getSuggestionStrength(password) {
-  return calculateStrength({
-    length: password.length,
-    uppercase: /[A-Z]/.test(password),
-    lowercase: /[a-z]/.test(password),
-    numbers: /[0-9]/.test(password),
-    symbols: /[^A-Za-z0-9]/.test(password),
-  });
+  return estimateStrengthFromPassword(password);
 }
