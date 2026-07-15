@@ -1,127 +1,98 @@
 # KeyPilot — Password Security Toolkit (Chrome Extension)
 
-A premium, fully offline Chrome extension that generates strong, secure
-passwords and checks the strength of any password — a complete password
-security toolkit.
+A premium, fully offline Chrome extension for generating strong passwords,
+checking password strength, and handling everyday password-security tasks
+— bulk generation, usernames, and configurable defaults — without ever
+sending your data anywhere.
 
 ## Features
 
-**Phase 1.1**
-- Crypto-secure password generation (`crypto.getRandomValues`)
-- One-click copy to clipboard with toast + button confirmation
-- Premium, responsive popup UI — no external services, no network calls
+**Generator**
+- Crypto-secure password generation (`crypto.getRandomValues`, never
+  `Math.random`)
+- Length slider and manual numeric input (8–64 characters)
+- Independent toggles for uppercase, lowercase, numbers, and symbols
+- Advanced options: avoid similar-looking characters (`O`, `0`, `I`,
+  `l`, `1`) and exclude specific characters
+- Live strength meter (Weak / Fair / Strong / Excellent) with character
+  count
+- **Security presets** — Banking, Email, Social, Work, Gaming,
+  Developer — apply a recommended configuration in one click
+- One-click **Copy** with toast + button confirmation
+- A clear warning (announced to screen readers) when the current
+  options leave no usable characters, with Generate/Copy disabled
+  until you fix it
 
-**Phase 1.2**
-- Password length slider and manual numeric input (8–64 characters)
-- Toggle uppercase, lowercase, numbers, and symbols independently
-- Avoid similar characters (`O`, `0`, `I`, `l`, `1`)
-- Custom excluded characters
-- Live strength meter with Weak / Fair / Strong / Excellent labels and
-  character count
-- Settings are saved locally (`chrome.storage.local`) and restored the
-  next time the popup opens
-- Clear warning when the selected options leave no usable characters —
-  generation and copy are disabled until at least one character is
-  available
-
-**Phase 2.1**
-- **Smart Password** section with **From Name** and **From Words** tabs
-- **From Name**: enter a first name, full name, nickname, or initials to
-  get 5 unique, memorable password suggestions that securely blend the
-  name with a random word, digits, and symbols — never the raw name or
-  a predictable pattern like `Name123`
-- **From Words**: enter up to 3 custom words to get 5 unique suggestions
-  combining them with digits, symbols, and varied capitalization
-- Each suggestion shows its own strength label, a **Copy** button with
-  a confirmation state, and a **Regenerate** button to swap just that
-  suggestion
-- All processing is local — nothing is saved or transmitted, and none
-  of the name/word input is written to `chrome.storage.local`
-
-**Phase 2.1 UI refinement**
-- Top-level segmented navigation with **Generator**, **Smart**,
-  **Checker**, and **Settings** tabs — only one screen is shown at a
-  time, keeping the Generator screen focused on core generation
-- The Smart Password tabs (From Name / From Words) now live entirely
-  under their own **Smart** screen
-- **Checker** and **Settings** are visible in the navigation as
-  "coming soon" placeholders at this point — built out in later phases
-
-**Phase 2.2 — Advanced Password Modes**
-- The **Smart** screen now has a single **Mode** selector covering 6
-  modes: **From Name**, **From Words**, **Memorable**, **Passphrase**,
-  **Pronounceable**, and **Theme-Based** — only the fields relevant to
-  the selected mode are shown
-- **Memorable**: 2 readable dictionary words + digits + a symbol,
-  generated automatically
-- **Passphrase**: 3–8 words (adjustable), joined with a chosen
-  separator (`-`, `_`, `.`, or space), with optional numbers and
-  symbols; each suggestion shows both its strength and its length
-- **Pronounceable**: consonant-vowel syllables mixed with digits and a
-  symbol for an easy-to-read but secure password
-- **Theme-Based**: pick a theme (Nature, Space, Ocean, Cyber, Fantasy)
-  to generate suggestions from that theme's word list
+**Smart Password**
+- One **Mode** selector covering 6 generation styles:
+  - **From Name** — first name, full name, nickname, or initials,
+    securely blended with a random word, digits, and symbols; never
+    returns the raw name or a predictable pattern like `Name123`
+  - **From Words** — up to 3 custom words combined with digits,
+    symbols, and varied capitalization
+  - **Memorable** — 2 readable dictionary words + digits + a symbol
+  - **Passphrase** — 3–8 words with a chosen separator (`-`, `_`, `.`,
+    or space) and optional numbers/symbols
+  - **Pronounceable** — consonant-vowel syllables mixed with digits
+    and a symbol for something easy to read but still secure
+  - **Theme-Based** — Nature, Space, Ocean, Cyber, or Fantasy word
+    lists
 - Every mode produces 5 unique suggestions, each with its own strength
   label, length, **Copy** (with confirmation), and **Regenerate**
-- **Copy All** copies every currently shown suggestion at once;
-  **Refresh All** regenerates the full set
-- The selected mode is remembered and restored the next time the
-  popup opens — the name/word/theme input itself is never saved
+- **Copy All** / **Refresh All** for the whole suggestion set
+- Your last-used mode is remembered — the name/word/theme input itself
+  never is
 
-**Phase 3 — Security Toolkit**
-- The **Checker** screen is now fully functional: type or paste any
-  password to instantly see its **Strength**, **character count**,
-  **Security Score** (0–100, penalized for common/repeated/sequential
-  patterns), and **Estimated Crack Time** (assuming a 10-billion-
-  guess-per-second offline attack)
-- A **Weaknesses** list and matching **Improvement Tips** list flag
-  short length, missing character types, commonly used passwords,
-  repeated characters (`aaa`), and sequential runs (`abc`, `123`) —
-  with a positive message when none apply
-- A **show/hide** toggle on the password field, since checking an
-  existing password means typing or pasting a real one
-- **Generate Stronger Password** produces a 20-character, all-
-  character-type replacement, with the same Copy/Regenerate card used
-  throughout the rest of the app
-- **Security presets** on the Generator screen — **Banking**, **Email**,
-  **Social**, **Work**, **Gaming**, and **Developer** — each a one-click
-  shortcut that applies a recommended length and character-type
-  combination and regenerates immediately
-- The password typed into the Checker is never saved, tracked, or
-  transmitted — it exists only in memory for as long as the popup is
-  open, exactly like every other input in the app
+**Tools**
+- **Bulk Passwords** — generate 10, 25, 50, or 100 passwords at once
+  using your current Generator settings, shown as a compact scrollable
+  list with per-password **Copy** plus **Copy All** / **Refresh All**
+- **Username Generator** — 5 suggestions per generate in 4 styles
+  (Professional, Minimal, Gaming, Developer), each with its own
+  **Copy** and **Regenerate**
 
-**Phase 3 UI refinement**
-- Redesigned the Generator screen and preset dropdown for a more
-  premium feel: the password card is the clear focal point (bigger
-  font, ambient glow, hover lift, a brief pulse on generate), Presets/
-  Length/Character Types are grouped into one quieter settings card,
-  and section labels use a small uppercase "eyebrow" style shared
-  across every screen
-- Pure presentation change — no functional difference from Phase 3
+**Checker**
+- Type or paste any password to instantly see its **Strength**,
+  **character count**, **Security Score** (0–100, penalized for
+  common/repeated/sequential patterns — not just raw entropy), and
+  **Estimated Crack Time** (assuming a 10-billion-guess-per-second
+  offline attack)
+- **Weaknesses** and matching **Improvement Tips** lists flag short
+  length, missing character types, commonly used passwords, repeated
+  characters (`aaa`), and sequential runs (`abc`, `123`) — with a
+  positive message when none apply
+- **Show/Hide** toggle on the password field
+- **Generate Stronger Password** — a ready-to-use 20-character
+  replacement, with the same Copy/Regenerate card used everywhere else
 
-**Phase 4.1 — Productivity & Settings**
-- New **Tools** tab with a mode selector:
-  - **Bulk Passwords**: generate 10, 25, 50, or 100 passwords at once
-    using your current Generator settings (length, character types),
-    shown as a compact scrollable list with a **Copy** button per
-    password plus **Copy All** / **Refresh All**
-  - **Username Generator**: 5 suggestions per generate in 4 styles —
-    **Professional**, **Minimal**, **Gaming**, and **Developer** — each
-    with its own **Copy** and **Regenerate**
-- **Settings** tab is now fully built out:
-  - **Default length** and **default Smart mode** are directly bound to
-    the same settings used by the Generator and Smart screens — change
-    it from either place and both stay in sync
-  - **Remember my preferences** toggle: turning it off stops KeyPilot
-    from saving length/character-type/mode preferences going forward
-    *and* clears anything already saved; turning it back on resumes
-    saving. Passwords and personal input are never saved either way,
-    on or off
-  - **Reset All Settings** restores every default and clears all
-    locally stored preferences in one click
-  - **About** card showing the installed version (read live from the
-    extension manifest) and a plain-language privacy statement
+**Settings**
+- **Default length** and **default Smart mode**, directly bound to the
+  same settings used on the Generator and Smart screens — change it
+  from either place and both stay in sync
+- **Remember my preferences** toggle — off both stops future saving
+  and clears anything already saved
+- **Reset All Settings** — restores every default in one click
+- **About** card with the installed version (read live from the
+  extension manifest) and a plain-language privacy statement
+
+## Privacy & security
+
+- Everything runs **entirely locally** — there are no network calls,
+  no analytics, and no external services anywhere in the extension.
+- **Passwords and personal input are never saved, tracked, or
+  transmitted** — not the password you're checking, not a name or
+  word you type into Smart Password, regardless of the preferences
+  setting below. They exist only in memory for as long as the popup
+  is open.
+- The only things ever written to `chrome.storage.local` are
+  non-sensitive UI preferences: your length/character-type settings,
+  your last-used Smart mode, and the remember-preferences flag itself
+  — and only while **Remember my preferences** (Settings) is on. Turn
+  it off and even those are cleared.
+- All randomness comes from the Web Crypto API
+  (`crypto.getRandomValues`), never `Math.random`.
+- The only permission requested is `storage`, used exclusively for the
+  preferences above.
 
 ## Installation (load unpacked)
 
@@ -129,8 +100,8 @@ security toolkit.
 2. Enable **Developer mode** (top-right toggle).
 3. Click **Load unpacked**.
 4. Select this project's root folder.
-5. The KeyPilot icon appears in your toolbar (click the puzzle-piece icon and pin
-   it if it's not visible).
+5. The KeyPilot icon appears in your toolbar (click the puzzle-piece
+   icon and pin it if it's not visible).
 
 ## Usage
 
@@ -139,43 +110,39 @@ security toolkit.
    **Tools**, **Checker**, and **Settings**.
 3. On **Generator**: a password is generated automatically using your
    last-used settings. Pick a **preset** (Banking, Email, Social, Work,
-   Gaming, Developer) to instantly apply a recommended configuration, or
-   adjust the length (slider or number field) and character types
+   Gaming, Developer) to instantly apply a recommended configuration,
+   or adjust the length (slider or number field) and character types
    yourself — the password regenerates automatically as you change
-   options. Open **Advanced options** to avoid similar-looking characters
-   or exclude specific characters. Click **Generate Password** for a new
-   one, or **Copy** to copy it to your clipboard. If every character type
-   is turned off (or exclusions remove all available characters), a
-   warning appears and Generate/Copy are disabled until you re-enable at
-   least one character type.
+   options. Open **Advanced options** to avoid similar-looking
+   characters or exclude specific characters. Click **Generate
+   Password** for a new one, or **Copy** to copy it to your clipboard.
 4. On **Smart**: choose a **Mode** (From Name, From Words, Memorable,
    Passphrase, Pronounceable, or Theme-Based), fill in any fields shown
    for that mode, and click **Generate Suggestions** to get 5 secure
    suggestions. Use **Copy** or **Regenerate** on any single suggestion,
-   or **Copy All** / **Refresh All** for the whole set. The mode you
-   last used is remembered the next time you open the popup.
+   or **Copy All** / **Refresh All** for the whole set.
 5. On **Tools**: choose **Bulk Passwords** to generate 10–100 passwords
    at once using your current Generator settings, or **Username
    Generator** to get 5 suggestions in a Professional, Minimal, Gaming,
-   or Developer style. Copy individual results or use **Copy All** /
-   **Refresh All**.
-6. On **Checker**: type or paste a password to see its strength, security
-   score, estimated crack time, and a list of weaknesses with tips to fix
-   them. Use the **Show/Hide** button to reveal or mask what you typed,
-   and click **Generate Stronger Password** for a ready-to-use, secure
+   or Developer style.
+6. On **Checker**: type or paste a password to see its strength,
+   security score, estimated crack time, and a list of weaknesses with
+   tips to fix them. Use **Show/Hide** to reveal or mask what you
+   typed, and click **Generate Stronger Password** for a ready-to-use
    alternative.
-7. On **Settings**: set your default length and default Smart mode
-   (these are the same settings used elsewhere, kept in sync), toggle
-   whether KeyPilot remembers your preferences on this device, reset
-   everything to defaults, or check the About card for the installed
-   version and privacy statement.
+7. On **Settings**: set your default length and default Smart mode,
+   toggle whether KeyPilot remembers your preferences on this device,
+   reset everything to defaults, or check the About card for the
+   installed version and privacy statement.
 
 ## Project structure
 
 ```
 Password Generator - Chrome Extension/
-├── manifest.json               # Manifest V3 config (storage permission)
+├── manifest.json               # Manifest V3 config (icons, storage permission)
 ├── package.json                # test script only, no runtime dependencies
+├── keypilot-logo.png            # source logo (icon mark + wordmark)
+├── icon16.png, icon48.png, icon128.png   # toolbar/store icons, generated from the logo
 ├── src/
 │   ├── popup/
 │   │   ├── popup.html          # popup markup
@@ -204,20 +171,19 @@ Password Generator - Chrome Extension/
 │       ├── smartResults.js       # suggestion cards (copy + regenerate)
 │       ├── usernameResults.js    # username cards (copy + regenerate, no strength/length)
 │       └── bulkResults.js        # compact scrollable bulk-password list
-├── test/
-│   ├── passwordGenerator.test.js
-│   ├── passwordStrength.test.js
-│   ├── passwordChecker.test.js
-│   ├── presets.test.js
-│   ├── settingsStorage.test.js
-│   ├── smartPassword.test.js
-│   ├── memorablePassword.test.js
-│   ├── passphrase.test.js
-│   ├── pronounceablePassword.test.js
-│   ├── themePassword.test.js
-│   ├── bulkGenerator.test.js
-│   └── usernameGenerator.test.js
-└── icons/                        # reserved for future icon assets
+└── test/
+    ├── passwordGenerator.test.js
+    ├── passwordStrength.test.js
+    ├── passwordChecker.test.js
+    ├── presets.test.js
+    ├── settingsStorage.test.js
+    ├── smartPassword.test.js
+    ├── memorablePassword.test.js
+    ├── passphrase.test.js
+    ├── pronounceablePassword.test.js
+    ├── themePassword.test.js
+    ├── bulkGenerator.test.js
+    └── usernameGenerator.test.js
 ```
 
 ## Running tests
@@ -229,6 +195,30 @@ dependencies to install):
 ```bash
 npm test
 ```
+
+## Development history
+
+KeyPilot was built in phases; each added a self-contained slice of
+functionality without breaking what came before.
+
+- **Phase 1.1/1.2** — core generator: crypto-secure generation, length,
+  character types, strength meter, settings persistence.
+- **Phase 2.1/2.2** — Smart Password: From Name, From Words, then
+  Memorable, Passphrase, Pronounceable, and Theme-Based modes, plus the
+  top-level Generator/Smart/Checker/Settings navigation.
+- **Phase 3** — Checker (strength, score, crack time, weaknesses/tips,
+  Generate Stronger Password), security presets, and a full visual
+  redesign of the Generator screen and preset dropdown.
+- **Phase 4.1** — Tools (bulk passwords, username generator) and a
+  fully built-out Settings screen (defaults, remember-preferences,
+  reset, about).
+- **Phase 4.2** — final polish pass: real KeyPilot branding and
+  correctly-sized toolbar icons (the previous icon16/48/128.png were
+  all actually 357×304px placeholders), an accessibility audit (missing
+  keyboard focus outlines on every button and the length slider,
+  missing `role="alert"` on warning banners), removal of leftover dead
+  CSS, and a full regression pass across every feature from every
+  phase.
 
 ## Roadmap
 

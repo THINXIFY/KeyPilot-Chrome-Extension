@@ -3,7 +3,7 @@
   "name": "KeyPilot",
   "short_name": "KeyPilot",
   "version": "1.4.0",
-  "description": "Smart Password Generator for Chrome",
+  "description": "Generate secure passwords, passphrases, and usernames, and check password strength — entirely offline.",
   "icons": {
     "16": "icon16.png",
     "48": "icon48.png",
