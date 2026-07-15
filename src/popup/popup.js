@@ -44,9 +44,31 @@ const smartGenerateBtn = document.getElementById('smart-generate-btn');
 const smartWarning = document.getElementById('smart-warning');
 const smartResults = document.getElementById('smart-results');
 
+const navItems = {
+  generator: document.getElementById('nav-generator'),
+  smart: document.getElementById('nav-smart'),
+  checker: document.getElementById('nav-checker'),
+  settings: document.getElementById('nav-settings'),
+};
+const screens = {
+  generator: document.getElementById('screen-generator'),
+  smart: document.getElementById('screen-smart'),
+  checker: document.getElementById('screen-checker'),
+  settings: document.getElementById('screen-settings'),
+};
+
 let settings = null;
 let saveTimeoutId = null;
 let activeSmartTab = 'name';
+
+function switchScreen(name) {
+  Object.keys(screens).forEach((key) => {
+    const isActive = key === name;
+    screens[key].hidden = !isActive;
+    navItems[key].classList.toggle('app__nav-item--active', isActive);
+    navItems[key].setAttribute('aria-selected', String(isActive));
+  });
+}
 
 function applySettingsToControls() {
   lengthInput.value = settings.length;
@@ -244,6 +266,10 @@ async function init() {
   smartWordInputs.forEach((input) => input.addEventListener('input', updateSmartGenerateState));
   smartGenerateBtn.addEventListener('click', handleSmartGenerate);
   updateSmartGenerateState();
+
+  Object.keys(navItems).forEach((key) => {
+    navItems[key].addEventListener('click', () => switchScreen(key));
+  });
 }
 
 init();

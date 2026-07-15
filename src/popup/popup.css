@@ -80,6 +80,87 @@ body {
   color: var(--color-text-muted);
 }
 
+.app__nav {
+  display: flex;
+  gap: var(--space-1);
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-1);
+}
+
+.app__nav-item {
+  flex: 1;
+  min-height: 34px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-1);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.app__nav-item:hover {
+  color: var(--color-text);
+}
+
+.app__nav-item--active {
+  background: var(--gradient-primary);
+  color: var(--color-heading);
+  box-shadow: 0 2px 10px rgba(0, 87, 255, 0.35);
+}
+
+.app__nav-item--active:hover {
+  color: var(--color-heading);
+}
+
+.app__nav-item:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.screen[hidden] {
+  display: none;
+}
+
+.screen__subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.screen--placeholder {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 220px;
+  gap: var(--space-2);
+}
+
+.placeholder__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.placeholder__text {
+  margin: 0;
+  max-width: 260px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
 .card {
   background: var(--color-card-bg);
   border: 1px solid var(--color-card-border);
@@ -401,21 +482,6 @@ body {
 
 .field__input::placeholder {
   color: var(--color-text-muted);
-}
-
-.smart-password {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-card-border);
-}
-
-.smart-password__title {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-heading);
 }
 
 .tabs {

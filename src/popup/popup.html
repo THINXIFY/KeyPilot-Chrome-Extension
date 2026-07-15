@@ -26,117 +26,126 @@
       </div>
     </header>
 
-    <section class="card">
-      <label class="visually-hidden" for="password-output">Generated password</label>
-      <input
-        id="password-output"
-        class="password-output"
-        type="text"
-        readonly
-        spellcheck="false"
-        autocomplete="off"
-        placeholder="No characters selected"
-      />
-    </section>
+    <nav class="app__nav" role="tablist" aria-label="Sections">
+      <button id="nav-generator" class="app__nav-item app__nav-item--active" type="button" role="tab" aria-selected="true" aria-controls="screen-generator">Generator</button>
+      <button id="nav-smart" class="app__nav-item" type="button" role="tab" aria-selected="false" aria-controls="screen-smart">Smart</button>
+      <button id="nav-checker" class="app__nav-item" type="button" role="tab" aria-selected="false" aria-controls="screen-checker">Checker</button>
+      <button id="nav-settings" class="app__nav-item" type="button" role="tab" aria-selected="false" aria-controls="screen-settings">Settings</button>
+    </nav>
 
-    <section class="strength" aria-live="polite">
-      <div class="strength-meter__track">
-        <div class="strength-meter__fill strength-meter__fill--weak"></div>
-      </div>
-      <div class="strength-meter__meta">
-        <span class="strength-meter__label">Strength: Weak</span>
-        <span class="strength-meter__count">16 characters</span>
-      </div>
-    </section>
-
-    <section class="control">
-      <div class="control__header">
-        <label class="control__label" for="length-input">Length</label>
+    <section id="screen-generator" class="screen" role="tabpanel" aria-labelledby="nav-generator">
+      <div class="card">
+        <label class="visually-hidden" for="password-output">Generated password</label>
         <input
-          id="length-input"
-          class="length-input"
-          type="number"
+          id="password-output"
+          class="password-output"
+          type="text"
+          readonly
+          spellcheck="false"
+          autocomplete="off"
+          placeholder="No characters selected"
+        />
+      </div>
+
+      <div class="strength" aria-live="polite">
+        <div class="strength-meter__track">
+          <div class="strength-meter__fill strength-meter__fill--weak"></div>
+        </div>
+        <div class="strength-meter__meta">
+          <span class="strength-meter__label">Strength: Weak</span>
+          <span class="strength-meter__count">16 characters</span>
+        </div>
+      </div>
+
+      <div class="control">
+        <div class="control__header">
+          <label class="control__label" for="length-input">Length</label>
+          <input
+            id="length-input"
+            class="length-input"
+            type="number"
+            min="8"
+            max="64"
+            step="1"
+            value="16"
+            inputmode="numeric"
+          />
+        </div>
+        <input
+          id="length-slider"
+          class="length-slider"
+          type="range"
           min="8"
           max="64"
           step="1"
           value="16"
-          inputmode="numeric"
         />
       </div>
-      <input
-        id="length-slider"
-        class="length-slider"
-        type="range"
-        min="8"
-        max="64"
-        step="1"
-        value="16"
-      />
-    </section>
 
-    <section class="control control--types">
-      <div class="toggle-grid">
-        <label class="toggle">
-          <input id="toggle-uppercase" type="checkbox" checked />
-          <span class="toggle__switch" aria-hidden="true"></span>
-          <span class="toggle__label">Uppercase (A-Z)</span>
-        </label>
-        <label class="toggle">
-          <input id="toggle-lowercase" type="checkbox" checked />
-          <span class="toggle__switch" aria-hidden="true"></span>
-          <span class="toggle__label">Lowercase (a-z)</span>
-        </label>
-        <label class="toggle">
-          <input id="toggle-numbers" type="checkbox" checked />
-          <span class="toggle__switch" aria-hidden="true"></span>
-          <span class="toggle__label">Numbers (0-9)</span>
-        </label>
-        <label class="toggle">
-          <input id="toggle-symbols" type="checkbox" checked />
-          <span class="toggle__switch" aria-hidden="true"></span>
-          <span class="toggle__label">Symbols (!@#...)</span>
-        </label>
-      </div>
-    </section>
-
-    <div id="warning-banner" class="warning-banner" hidden>
-      Select at least one character type to generate a password.
-    </div>
-
-    <div class="actions">
-      <button id="generate-btn" class="btn btn--primary" type="button">
-        Generate Password
-      </button>
-      <button id="copy-btn" class="btn btn--secondary" type="button">
-        Copy
-      </button>
-    </div>
-
-    <details class="advanced">
-      <summary class="advanced__summary">Advanced options</summary>
-      <div class="advanced__content">
-        <label class="toggle toggle--full">
-          <input id="toggle-exclude-similar" type="checkbox" />
-          <span class="toggle__switch" aria-hidden="true"></span>
-          <span class="toggle__label">Avoid similar characters (O, 0, I, l, 1)</span>
-        </label>
-
-        <div class="field">
-          <label class="field__label" for="exclude-chars-input">Custom excluded characters</label>
-          <input
-            id="exclude-chars-input"
-            class="field__input"
-            type="text"
-            placeholder="e.g. {}~^"
-            autocomplete="off"
-            spellcheck="false"
-          />
+      <div class="control control--types">
+        <div class="toggle-grid">
+          <label class="toggle">
+            <input id="toggle-uppercase" type="checkbox" checked />
+            <span class="toggle__switch" aria-hidden="true"></span>
+            <span class="toggle__label">Uppercase (A-Z)</span>
+          </label>
+          <label class="toggle">
+            <input id="toggle-lowercase" type="checkbox" checked />
+            <span class="toggle__switch" aria-hidden="true"></span>
+            <span class="toggle__label">Lowercase (a-z)</span>
+          </label>
+          <label class="toggle">
+            <input id="toggle-numbers" type="checkbox" checked />
+            <span class="toggle__switch" aria-hidden="true"></span>
+            <span class="toggle__label">Numbers (0-9)</span>
+          </label>
+          <label class="toggle">
+            <input id="toggle-symbols" type="checkbox" checked />
+            <span class="toggle__switch" aria-hidden="true"></span>
+            <span class="toggle__label">Symbols (!@#...)</span>
+          </label>
         </div>
       </div>
-    </details>
 
-    <section class="smart-password">
-      <h2 class="smart-password__title">Smart Password</h2>
+      <div id="warning-banner" class="warning-banner" hidden>
+        Select at least one character type to generate a password.
+      </div>
+
+      <div class="actions">
+        <button id="generate-btn" class="btn btn--primary" type="button">
+          Generate Password
+        </button>
+        <button id="copy-btn" class="btn btn--secondary" type="button">
+          Copy
+        </button>
+      </div>
+
+      <details class="advanced">
+        <summary class="advanced__summary">Advanced options</summary>
+        <div class="advanced__content">
+          <label class="toggle toggle--full">
+            <input id="toggle-exclude-similar" type="checkbox" />
+            <span class="toggle__switch" aria-hidden="true"></span>
+            <span class="toggle__label">Avoid similar characters (O, 0, I, l, 1)</span>
+          </label>
+
+          <div class="field">
+            <label class="field__label" for="exclude-chars-input">Custom excluded characters</label>
+            <input
+              id="exclude-chars-input"
+              class="field__input"
+              type="text"
+              placeholder="e.g. {}~^"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section id="screen-smart" class="screen" role="tabpanel" aria-labelledby="nav-smart" hidden>
+      <p class="screen__subtitle">Generate a memorable password from a name or your own words.</p>
 
       <div class="tabs" role="tablist">
         <button id="tab-name" class="tab tab--active" type="button" role="tab" aria-selected="true">From Name</button>
@@ -174,6 +183,16 @@
       </div>
 
       <div id="smart-results" class="smart-results"></div>
+    </section>
+
+    <section id="screen-checker" class="screen screen--placeholder" role="tabpanel" aria-labelledby="nav-checker" hidden>
+      <p class="placeholder__title">Password Checker</p>
+      <p class="placeholder__text">Coming soon — check the strength of an existing password.</p>
+    </section>
+
+    <section id="screen-settings" class="screen screen--placeholder" role="tabpanel" aria-labelledby="nav-settings" hidden>
+      <p class="placeholder__title">Settings</p>
+      <p class="placeholder__text">Coming soon — customize CipherKey to your preferences.</p>
     </section>
 
     <div class="toast" role="status" aria-live="polite"></div>

@@ -37,6 +37,16 @@ fully configurable passwords.
 - All processing is local — nothing is saved or transmitted, and none
   of the name/word input is written to `chrome.storage.local`
 
+**Phase 2.1 UI refinement**
+- Top-level segmented navigation with **Generator**, **Smart**,
+  **Checker**, and **Settings** tabs — only one screen is shown at a
+  time, keeping the Generator screen focused on core generation
+- The Smart Password tabs (From Name / From Words) now live entirely
+  under their own **Smart** screen
+- **Checker** and **Settings** are visible in the navigation as
+  "coming soon" placeholders — no functionality is implemented yet;
+  they're scaffolding for later phases
+
 ## Installation (load unpacked)
 
 1. Open `chrome://extensions` in Chrome.
@@ -49,21 +59,22 @@ fully configurable passwords.
 ## Usage
 
 1. Click the CipherKey toolbar icon to open the popup.
-2. A password is generated automatically using your last-used settings
-   (or sensible defaults the first time).
-3. Adjust the length (slider or the number field), or toggle character
-   types — the password regenerates automatically as you change options.
-4. Open **Advanced options** to avoid similar-looking characters or
-   exclude specific characters.
-5. Click **Generate Password** to get a new password with the current
-   settings, or **Copy** to copy it to your clipboard.
-6. If every character type is turned off (or your exclusions remove all
-   available characters), a warning appears and Generate/Copy are
-   disabled until you re-enable at least one character type.
-7. In the **Smart Password** section, pick **From Name** or **From
-   Words**, fill in the field(s), and click **Generate Suggestions** to
-   get 5 memorable, secure password suggestions. Use **Copy** on any
-   suggestion, or **Regenerate** to get a new one in its place.
+2. Use the top navigation to switch between **Generator**, **Smart**,
+   **Checker**, and **Settings**. Checker and Settings are placeholders
+   for future phases.
+3. On **Generator**: a password is generated automatically using your
+   last-used settings. Adjust the length (slider or number field) or
+   toggle character types — the password regenerates automatically as
+   you change options. Open **Advanced options** to avoid similar-looking
+   characters or exclude specific characters. Click **Generate Password**
+   for a new one, or **Copy** to copy it to your clipboard. If every
+   character type is turned off (or exclusions remove all available
+   characters), a warning appears and Generate/Copy are disabled until
+   you re-enable at least one character type.
+4. On **Smart**: pick **From Name** or **From Words**, fill in the
+   field(s), and click **Generate Suggestions** to get 5 memorable,
+   secure password suggestions. Use **Copy** on any suggestion, or
+   **Regenerate** to get a new one in its place.
 
 ## Project structure
 
