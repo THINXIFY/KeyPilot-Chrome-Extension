@@ -19,6 +19,7 @@ import { updateStrengthMeter } from '../components/strengthMeter.js';
 import { renderSuggestions } from '../components/smartResults.js';
 
 const passwordOutput = document.getElementById('password-output');
+const passwordCard = document.querySelector('.card');
 const generateBtn = document.getElementById('generate-btn');
 const copyBtn = document.getElementById('copy-btn');
 const app = document.querySelector('.app');
@@ -151,9 +152,11 @@ function renderPassword() {
 
   passwordOutput.value = password;
   passwordOutput.classList.remove('is-updating');
-  // Force reflow so the fade-in animation replays on consecutive changes.
+  passwordCard.classList.remove('is-pulsing');
+  // Force reflow so the fade-in/pulse animations replay on consecutive changes.
   void passwordOutput.offsetWidth;
   passwordOutput.classList.add('is-updating');
+  passwordCard.classList.add('is-pulsing');
 
   const { label } = calculateStrength(settings);
   updateStrengthMeter(strengthSection, { label, length: settings.length });

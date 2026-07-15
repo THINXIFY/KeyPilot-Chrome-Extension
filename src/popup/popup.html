@@ -45,83 +45,85 @@
           autocomplete="off"
           placeholder="No characters selected"
         />
-      </div>
 
-      <div class="strength" aria-live="polite">
-        <div class="strength-meter__track">
-          <div class="strength-meter__fill strength-meter__fill--weak"></div>
+        <div class="strength" aria-live="polite">
+          <div class="strength-meter__track">
+            <div class="strength-meter__fill strength-meter__fill--weak"></div>
+          </div>
+          <div class="strength-meter__meta">
+            <span class="strength-meter__label">Strength: Weak</span>
+            <span class="strength-meter__count">16 characters</span>
+          </div>
         </div>
-        <div class="strength-meter__meta">
-          <span class="strength-meter__label">Strength: Weak</span>
-          <span class="strength-meter__count">16 characters</span>
+      </div>
+
+      <div class="settings-card">
+        <div class="control control--presets">
+          <label class="control__label" for="preset-select">Presets</label>
+          <select id="preset-select" class="select select--icon">
+            <option value="">Custom</option>
+            <option value="banking">Banking</option>
+            <option value="email">Email</option>
+            <option value="social">Social</option>
+            <option value="work">Work</option>
+            <option value="gaming">Gaming</option>
+            <option value="developer">Developer</option>
+          </select>
         </div>
-      </div>
 
-      <div class="control control--presets">
-        <label class="control__label" for="preset-select">Presets</label>
-        <select id="preset-select" class="select">
-          <option value="">Custom</option>
-          <option value="banking">Banking</option>
-          <option value="email">Email</option>
-          <option value="social">Social</option>
-          <option value="work">Work</option>
-          <option value="gaming">Gaming</option>
-          <option value="developer">Developer</option>
-        </select>
-      </div>
-
-      <div class="control">
-        <div class="control__header">
-          <label class="control__label" for="length-input">Length</label>
+        <div class="control">
+          <div class="control__header">
+            <label class="control__label" for="length-input">Length</label>
+            <input
+              id="length-input"
+              class="length-input"
+              type="number"
+              min="8"
+              max="64"
+              step="1"
+              value="16"
+              inputmode="numeric"
+            />
+          </div>
           <input
-            id="length-input"
-            class="length-input"
-            type="number"
+            id="length-slider"
+            class="length-slider"
+            type="range"
             min="8"
             max="64"
             step="1"
             value="16"
-            inputmode="numeric"
           />
         </div>
-        <input
-          id="length-slider"
-          class="length-slider"
-          type="range"
-          min="8"
-          max="64"
-          step="1"
-          value="16"
-        />
-      </div>
 
-      <div class="control control--types">
-        <div class="toggle-grid">
-          <label class="toggle">
-            <input id="toggle-uppercase" type="checkbox" checked />
-            <span class="toggle__switch" aria-hidden="true"></span>
-            <span class="toggle__label">Uppercase (A-Z)</span>
-          </label>
-          <label class="toggle">
-            <input id="toggle-lowercase" type="checkbox" checked />
-            <span class="toggle__switch" aria-hidden="true"></span>
-            <span class="toggle__label">Lowercase (a-z)</span>
-          </label>
-          <label class="toggle">
-            <input id="toggle-numbers" type="checkbox" checked />
-            <span class="toggle__switch" aria-hidden="true"></span>
-            <span class="toggle__label">Numbers (0-9)</span>
-          </label>
-          <label class="toggle">
-            <input id="toggle-symbols" type="checkbox" checked />
-            <span class="toggle__switch" aria-hidden="true"></span>
-            <span class="toggle__label">Symbols (!@#...)</span>
-          </label>
+        <div class="control control--types">
+          <div class="toggle-grid">
+            <label class="toggle">
+              <input id="toggle-uppercase" type="checkbox" checked />
+              <span class="toggle__switch" aria-hidden="true"></span>
+              <span class="toggle__label">Uppercase (A-Z)</span>
+            </label>
+            <label class="toggle">
+              <input id="toggle-lowercase" type="checkbox" checked />
+              <span class="toggle__switch" aria-hidden="true"></span>
+              <span class="toggle__label">Lowercase (a-z)</span>
+            </label>
+            <label class="toggle">
+              <input id="toggle-numbers" type="checkbox" checked />
+              <span class="toggle__switch" aria-hidden="true"></span>
+              <span class="toggle__label">Numbers (0-9)</span>
+            </label>
+            <label class="toggle">
+              <input id="toggle-symbols" type="checkbox" checked />
+              <span class="toggle__switch" aria-hidden="true"></span>
+              <span class="toggle__label">Symbols (!@#...)</span>
+            </label>
+          </div>
         </div>
-      </div>
 
-      <div id="warning-banner" class="warning-banner" hidden>
-        Select at least one character type to generate a password.
+        <div id="warning-banner" class="warning-banner" hidden>
+          Select at least one character type to generate a password.
+        </div>
       </div>
 
       <div class="actions">
