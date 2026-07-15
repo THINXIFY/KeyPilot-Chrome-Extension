@@ -118,11 +118,12 @@
 
       <div class="actions">
         <button id="generate-btn" class="btn btn--primary" type="button">
-          Generate Password
+          Generate
         </button>
         <button id="copy-btn" class="btn btn--secondary" type="button">
           Copy
         </button>
+        <button id="favorite-btn" class="btn btn--icon" type="button" aria-label="Add to favorites" aria-pressed="false">☆</button>
       </div>
 
       <details class="advanced">
@@ -268,6 +269,8 @@
         <select id="tools-mode-select" class="select">
           <option value="bulk">Bulk Passwords</option>
           <option value="username">Username Generator</option>
+          <option value="favorites">Favorites</option>
+          <option value="recent">Recent Passwords</option>
         </select>
       </div>
 
@@ -294,6 +297,14 @@
         </div>
       </div>
 
+      <div id="panel-favorites" class="mode-panel" hidden>
+        <p class="mode-panel__hint">Passwords you've saved. Stored only on this device.</p>
+      </div>
+
+      <div id="panel-recent" class="mode-panel" hidden>
+        <p class="mode-panel__hint">Your last 20 copied passwords. Stored only on this device.</p>
+      </div>
+
       <button id="tools-generate-btn" class="btn btn--primary" type="button">Generate Passwords</button>
 
       <div id="tools-warning" class="warning-banner" role="alert" hidden>
@@ -305,67 +316,156 @@
         <button id="tools-refresh-all-btn" class="suggestion-card__btn suggestion-card__btn--secondary" type="button">Refresh All</button>
       </div>
 
+      <div id="tools-library-actions" class="smart-results-actions" hidden>
+        <button id="tools-export-txt-btn" class="suggestion-card__btn" type="button">Export TXT</button>
+        <button id="tools-export-csv-btn" class="suggestion-card__btn" type="button">Export CSV</button>
+        <button id="tools-clear-library-btn" class="suggestion-card__btn suggestion-card__btn--secondary" type="button">Clear</button>
+      </div>
+
       <div id="bulk-results" class="bulk-results" hidden></div>
       <div id="username-results" class="smart-results" hidden></div>
+      <div id="library-results" class="smart-results" hidden></div>
     </section>
 
     <section id="screen-checker" class="screen" role="tabpanel" aria-labelledby="nav-checker" hidden>
       <p class="screen__subtitle">Check any password's strength, crack time, and get tips to improve it.</p>
 
       <div class="field">
-        <label class="field__label" for="checker-input">Password to check</label>
-        <div class="checker-input-row">
-          <input
-            id="checker-input"
-            class="field__input checker-input-row__input"
-            type="password"
-            placeholder="Type or paste a password"
-            autocomplete="off"
-            spellcheck="false"
-          />
-          <button id="checker-toggle-btn" class="checker-toggle-btn" type="button" aria-label="Show password">Show</button>
+        <label class="field__label" for="checker-mode-select">Mode</label>
+        <select id="checker-mode-select" class="select">
+          <option value="check">Check Password</option>
+          <option value="compare">Compare Passwords</option>
+        </select>
+      </div>
+
+      <div id="panel-check" class="mode-panel">
+        <div class="field">
+          <label class="field__label" for="checker-input">Password to check</label>
+          <div class="checker-input-row">
+            <input
+              id="checker-input"
+              class="field__input checker-input-row__input"
+              type="password"
+              placeholder="Type or paste a password"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button id="checker-toggle-btn" class="checker-toggle-btn" type="button" aria-label="Show password">Show</button>
+          </div>
+        </div>
+
+        <p id="checker-empty" class="mode-panel__hint">Enter a password above to see its analysis.</p>
+
+        <div id="checker-results" class="checker-results" hidden>
+          <div id="checker-strength" class="strength" aria-live="polite">
+            <div class="strength-meter__track">
+              <div class="strength-meter__fill strength-meter__fill--weak"></div>
+            </div>
+            <div class="strength-meter__meta">
+              <span class="strength-meter__label">Strength: Weak</span>
+              <span class="strength-meter__count">0 characters</span>
+            </div>
+          </div>
+
+          <div class="checker-stats">
+            <div class="checker-stat">
+              <span class="checker-stat__label">Security Score</span>
+              <span id="checker-score-value" class="checker-stat__value">0/100</span>
+            </div>
+            <div class="checker-stat">
+              <span class="checker-stat__label">Estimated Crack Time</span>
+              <span id="checker-crack-value" class="checker-stat__value">—</span>
+            </div>
+          </div>
+
+          <div class="checker-list">
+            <p class="checker-list__title">Weaknesses</p>
+            <ul id="checker-weaknesses-list" class="checker-list__items"></ul>
+          </div>
+
+          <div class="checker-list">
+            <p class="checker-list__title">Improvement Tips</p>
+            <ul id="checker-tips-list" class="checker-list__items"></ul>
+          </div>
+
+          <button id="checker-generate-btn" class="btn btn--primary" type="button">
+            Generate Stronger Password
+          </button>
+
+          <div id="checker-suggestion-results" class="smart-results"></div>
         </div>
       </div>
 
-      <p id="checker-empty" class="mode-panel__hint">Enter a password above to see its analysis.</p>
-
-      <div id="checker-results" class="checker-results" hidden>
-        <div id="checker-strength" class="strength" aria-live="polite">
-          <div class="strength-meter__track">
-            <div class="strength-meter__fill strength-meter__fill--weak"></div>
-          </div>
-          <div class="strength-meter__meta">
-            <span class="strength-meter__label">Strength: Weak</span>
-            <span class="strength-meter__count">0 characters</span>
-          </div>
-        </div>
-
-        <div class="checker-stats">
-          <div class="checker-stat">
-            <span class="checker-stat__label">Security Score</span>
-            <span id="checker-score-value" class="checker-stat__value">0/100</span>
-          </div>
-          <div class="checker-stat">
-            <span class="checker-stat__label">Estimated Crack Time</span>
-            <span id="checker-crack-value" class="checker-stat__value">—</span>
+      <div id="panel-compare" class="mode-panel" hidden>
+        <div class="field">
+          <label class="field__label" for="compare-input-a">Password A</label>
+          <div class="checker-input-row">
+            <input
+              id="compare-input-a"
+              class="field__input checker-input-row__input"
+              type="password"
+              placeholder="Type or paste a password"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button id="compare-toggle-a" class="checker-toggle-btn" type="button" aria-label="Show password">Show</button>
           </div>
         </div>
 
-        <div class="checker-list">
-          <p class="checker-list__title">Weaknesses</p>
-          <ul id="checker-weaknesses-list" class="checker-list__items"></ul>
+        <div class="field">
+          <label class="field__label" for="compare-input-b">Password B</label>
+          <div class="checker-input-row">
+            <input
+              id="compare-input-b"
+              class="field__input checker-input-row__input"
+              type="password"
+              placeholder="Type or paste a password"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button id="compare-toggle-b" class="checker-toggle-btn" type="button" aria-label="Show password">Show</button>
+          </div>
         </div>
 
-        <div class="checker-list">
-          <p class="checker-list__title">Improvement Tips</p>
-          <ul id="checker-tips-list" class="checker-list__items"></ul>
+        <p id="compare-empty" class="mode-panel__hint">Enter at least one password above to compare.</p>
+
+        <div id="compare-winner" class="compare-winner" hidden></div>
+
+        <div class="compare-columns">
+          <div id="compare-column-a" class="compare-column" hidden>
+            <p class="settings-card__heading">Password A</p>
+            <div id="compare-strength-a" class="strength" aria-live="polite">
+              <div class="strength-meter__track">
+                <div class="strength-meter__fill strength-meter__fill--weak"></div>
+              </div>
+              <div class="strength-meter__meta">
+                <span class="strength-meter__label">Strength: Weak</span>
+                <span class="strength-meter__count">0 characters</span>
+              </div>
+            </div>
+            <div class="checker-stat">
+              <span class="checker-stat__label">Security Score</span>
+              <span id="compare-score-a" class="checker-stat__value">0/100</span>
+            </div>
+          </div>
+
+          <div id="compare-column-b" class="compare-column" hidden>
+            <p class="settings-card__heading">Password B</p>
+            <div id="compare-strength-b" class="strength" aria-live="polite">
+              <div class="strength-meter__track">
+                <div class="strength-meter__fill strength-meter__fill--weak"></div>
+              </div>
+              <div class="strength-meter__meta">
+                <span class="strength-meter__label">Strength: Weak</span>
+                <span class="strength-meter__count">0 characters</span>
+              </div>
+            </div>
+            <div class="checker-stat">
+              <span class="checker-stat__label">Security Score</span>
+              <span id="compare-score-b" class="checker-stat__value">0/100</span>
+            </div>
+          </div>
         </div>
-
-        <button id="checker-generate-btn" class="btn btn--primary" type="button">
-          Generate Stronger Password
-        </button>
-
-        <div id="checker-suggestion-results" class="smart-results"></div>
       </div>
     </section>
 

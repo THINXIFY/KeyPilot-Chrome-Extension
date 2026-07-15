@@ -15,6 +15,19 @@ import { analyzePassword, generateStrongerPassword } from '../lib/passwordChecke
 import { getPresetSettings } from '../lib/presets.js';
 import { generateUsernames, generateOneUsername } from '../lib/usernameGenerator.js';
 import { generateBulk } from '../lib/bulkGenerator.js';
+import { generateSimilarPassword } from '../lib/similarPassword.js';
+import { comparePasswords } from '../lib/comparePasswords.js';
+import { toTxt, toCsv, downloadFile } from '../lib/exportPasswords.js';
+import {
+  loadFavorites,
+  isFavorite,
+  addFavorite,
+  removeFavorite,
+  clearFavorites,
+  loadRecent,
+  addRecent,
+  clearRecent,
+} from '../lib/passwordLibrary.js';
 import {
   loadSettings,
   saveSettings,
@@ -29,11 +42,13 @@ import { updateStrengthMeter } from '../components/strengthMeter.js';
 import { renderSuggestions } from '../components/smartResults.js';
 import { renderUsernames } from '../components/usernameResults.js';
 import { renderBulkList } from '../components/bulkResults.js';
+import { renderLibraryList } from '../components/libraryResults.js';
 
 const passwordOutput = document.getElementById('password-output');
 const passwordCard = document.querySelector('.card');
 const generateBtn = document.getElementById('generate-btn');
 const copyBtn = document.getElementById('copy-btn');
+const favoriteBtn = document.getElementById('favorite-btn');
 const app = document.querySelector('.app');
 const strengthSection = document.querySelector('.strength');
 const lengthInput = document.getElementById('length-input');
@@ -81,6 +96,8 @@ const toolsModeSelect = document.getElementById('tools-mode-select');
 const toolsModePanels = {
   bulk: document.getElementById('panel-bulk'),
   username: document.getElementById('panel-username'),
+  favorites: document.getElementById('panel-favorites'),
+  recent: document.getElementById('panel-recent'),
 };
 const quantityBtns = Array.from(document.querySelectorAll('#panel-bulk .separator-btn'));
 const styleBtns = Array.from(document.querySelectorAll('#panel-username .theme-btn'));
@@ -89,14 +106,23 @@ const toolsWarning = document.getElementById('tools-warning');
 const toolsResultsActions = document.getElementById('tools-results-actions');
 const toolsCopyAllBtn = document.getElementById('tools-copy-all-btn');
 const toolsRefreshAllBtn = document.getElementById('tools-refresh-all-btn');
+const toolsLibraryActions = document.getElementById('tools-library-actions');
+const toolsExportTxtBtn = document.getElementById('tools-export-txt-btn');
+const toolsExportCsvBtn = document.getElementById('tools-export-csv-btn');
+const toolsClearLibraryBtn = document.getElementById('tools-clear-library-btn');
 const bulkResultsEl = document.getElementById('bulk-results');
 const usernameResultsEl = document.getElementById('username-results');
+const libraryResultsEl = document.getElementById('library-results');
 
 const settingsLengthInput = document.getElementById('settings-length-input');
 const settingsModeSelect = document.getElementById('settings-mode-select');
 const rememberToggle = document.getElementById('remember-preferences-toggle');
 const resetSettingsBtn = document.getElementById('reset-settings-btn');
 const aboutVersionEl = document.getElementById('about-version');
+
+const checkerModeSelect = document.getElementById('checker-mode-select');
+const panelCheck = document.getElementById('panel-check');
+const panelCompare = document.getElementById('panel-compare');
 
 const checkerInput = document.getElementById('checker-input');
 const checkerToggleBtn = document.getElementById('checker-toggle-btn');
@@ -109,6 +135,19 @@ const checkerWeaknessesList = document.getElementById('checker-weaknesses-list')
 const checkerTipsList = document.getElementById('checker-tips-list');
 const checkerGenerateBtn = document.getElementById('checker-generate-btn');
 const checkerSuggestionResults = document.getElementById('checker-suggestion-results');
+
+const compareInputA = document.getElementById('compare-input-a');
+const compareInputB = document.getElementById('compare-input-b');
+const compareToggleA = document.getElementById('compare-toggle-a');
+const compareToggleB = document.getElementById('compare-toggle-b');
+const compareEmpty = document.getElementById('compare-empty');
+const compareWinner = document.getElementById('compare-winner');
+const compareColumnA = document.getElementById('compare-column-a');
+const compareColumnB = document.getElementById('compare-column-b');
+const compareStrengthA = document.getElementById('compare-strength-a');
+const compareStrengthB = document.getElementById('compare-strength-b');
+const compareScoreA = document.getElementById('compare-score-a');
+const compareScoreB = document.getElementById('compare-score-b');
 
 const navItems = {
   generator: document.getElementById('nav-generator'),
@@ -181,13 +220,16 @@ function renderPassword() {
     warningBanner.hidden = false;
     generateBtn.disabled = true;
     copyBtn.disabled = true;
+    favoriteBtn.disabled = true;
     updateStrengthMeter(strengthSection, { label: 'Weak', length: settings.length });
+    updateFavoriteButtonState('');
     return;
   }
 
   warningBanner.hidden = true;
   generateBtn.disabled = false;
   copyBtn.disabled = false;
+  favoriteBtn.disabled = false;
 
   passwordOutput.value = password;
   passwordOutput.classList.remove('is-updating');
@@ -199,6 +241,7 @@ function renderPassword() {
 
   const { label } = calculateStrength(settings);
   updateStrengthMeter(strengthSection, { label, length: settings.length });
+  updateFavoriteButtonState(password);
 }
 
 function persistSettings() {
@@ -251,6 +294,55 @@ function handlePresetSelect() {
   persistSettings();
 }
 
+async function updateFavoriteButtonState(password) {
+  const favorited = password ? await isFavorite(password) : false;
+  favoriteBtn.textContent = favorited ? '★' : '☆';
+  favoriteBtn.setAttribute('aria-pressed', String(favorited));
+  favoriteBtn.setAttribute('aria-label', favorited ? 'Remove from favorites' : 'Add to favorites');
+}
+
+async function handleFavoriteToggle() {
+  const password = passwordOutput.value;
+  if (!password) return;
+
+  if (await isFavorite(password)) {
+    await removeFavorite(password);
+    showToast(app, 'Removed from Favorites', 'success');
+  } else {
+    await addFavorite(password);
+    showToast(app, 'Added to Favorites', 'success');
+  }
+  await updateFavoriteButtonState(password);
+}
+
+async function handleCardFavorite(password) {
+  await addFavorite(password);
+  showToast(app, 'Added to Favorites', 'success');
+}
+
+// Shared copy handler for every single-password Copy button in the app
+// (Generator's own button wraps this with its own label/state below).
+// Copying a password also records it in Recent — but "Copy All" actions
+// (which copy many passwords as one clipboard blob) deliberately do not
+// call this, so bulk copies don't flood the last-20 Recent list.
+async function copyPassword(password) {
+  try {
+    const succeeded = await copyToClipboard(password);
+    showToast(
+      app,
+      succeeded ? 'Copied to clipboard' : 'Copy failed — please try again',
+      succeeded ? 'success' : 'error'
+    );
+    if (succeeded) {
+      addRecent(password);
+    }
+    return succeeded;
+  } catch {
+    showToast(app, 'Copy failed — please try again', 'error');
+    return false;
+  }
+}
+
 const COPY_LABEL = 'Copy';
 const COPIED_LABEL = 'Copied ✓';
 let copiedTimeoutId = null;
@@ -258,25 +350,15 @@ let copiedTimeoutId = null;
 async function handleCopy() {
   if (!passwordOutput.value) return;
 
-  try {
-    const succeeded = await copyToClipboard(passwordOutput.value);
-    showToast(
-      app,
-      succeeded ? 'Copied to clipboard' : 'Copy failed — please try again',
-      succeeded ? 'success' : 'error'
-    );
-
-    if (succeeded) {
-      clearTimeout(copiedTimeoutId);
-      copyBtn.textContent = COPIED_LABEL;
-      copyBtn.classList.add('btn--copied');
-      copiedTimeoutId = setTimeout(() => {
-        copyBtn.textContent = COPY_LABEL;
-        copyBtn.classList.remove('btn--copied');
-      }, 1500);
-    }
-  } catch {
-    showToast(app, 'Copy failed — please try again', 'error');
+  const succeeded = await copyPassword(passwordOutput.value);
+  if (succeeded) {
+    clearTimeout(copiedTimeoutId);
+    copyBtn.textContent = COPIED_LABEL;
+    copyBtn.classList.add('btn--copied');
+    copiedTimeoutId = setTimeout(() => {
+      copyBtn.textContent = COPY_LABEL;
+      copyBtn.classList.remove('btn--copied');
+    }, 1500);
   }
 }
 
@@ -337,21 +419,6 @@ function updateSmartGenerateState() {
   smartGenerateBtn.disabled = !valid;
 }
 
-async function handleSuggestionCopy(password) {
-  try {
-    const succeeded = await copyToClipboard(password);
-    showToast(
-      app,
-      succeeded ? 'Copied to clipboard' : 'Copy failed — please try again',
-      succeeded ? 'success' : 'error'
-    );
-    return succeeded;
-  } catch {
-    showToast(app, 'Copy failed — please try again', 'error');
-    return false;
-  }
-}
-
 function handleSmartGenerate() {
   const passwords = generateForActiveMode();
 
@@ -365,8 +432,9 @@ function handleSmartGenerate() {
   smartWarning.hidden = true;
   smartResultsActions.hidden = false;
   renderSuggestions(smartResults, passwords, {
-    onCopy: handleSuggestionCopy,
+    onCopy: copyPassword,
     onRegenerate: regenerateOneForActiveMode,
+    onFavorite: handleCardFavorite,
   });
 }
 
@@ -437,11 +505,57 @@ function handleCheckerToggleVisibility() {
   checkerToggleBtn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
 }
 
+function switchCheckerMode(mode) {
+  checkerModeSelect.value = mode;
+  panelCheck.hidden = mode !== 'check';
+  panelCompare.hidden = mode !== 'compare';
+}
+
+function handleCompareToggleVisibility(input, btn) {
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  btn.textContent = isHidden ? 'Hide' : 'Show';
+  btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+}
+
+function updateCompareColumn(columnEl, strengthEl, scoreEl, analysis) {
+  if (!analysis) {
+    columnEl.hidden = true;
+    return;
+  }
+  columnEl.hidden = false;
+  updateStrengthMeter(strengthEl, { label: analysis.label, length: analysis.length });
+  scoreEl.textContent = `${analysis.score}/100`;
+  scoreEl.className = `checker-stat__value checker-stat__value--${analysis.label.toLowerCase()}`;
+}
+
+function runCompareAnalysis() {
+  const { a, b, winner } = comparePasswords(compareInputA.value, compareInputB.value);
+
+  compareEmpty.hidden = Boolean(a || b);
+  updateCompareColumn(compareColumnA, compareStrengthA, compareScoreA, a);
+  updateCompareColumn(compareColumnB, compareStrengthB, compareScoreB, b);
+
+  if (!winner) {
+    compareWinner.hidden = true;
+    return;
+  }
+
+  compareWinner.hidden = false;
+  compareWinner.classList.toggle('compare-winner--tie', winner === 'tie');
+  compareWinner.textContent = winner === 'tie'
+    ? 'Both passwords are equally strong'
+    : winner === 'a'
+      ? 'Password A is stronger'
+      : 'Password B is stronger';
+}
+
 function handleCheckerGenerate() {
   const password = generateStrongerPassword();
   renderSuggestions(checkerSuggestionResults, [password], {
-    onCopy: handleSuggestionCopy,
+    onCopy: copyPassword,
     onRegenerate: generateStrongerPassword,
+    onFavorite: handleCardFavorite,
   });
 }
 
@@ -471,27 +585,26 @@ function switchToolsMode(mode) {
   Object.keys(toolsModePanels).forEach((key) => {
     toolsModePanels[key].hidden = key !== mode;
   });
-  toolsGenerateBtn.textContent = mode === 'bulk' ? 'Generate Passwords' : 'Generate Usernames';
+
+  const isLibraryMode = mode === 'favorites' || mode === 'recent';
+
+  toolsGenerateBtn.hidden = isLibraryMode;
+  if (mode === 'bulk') toolsGenerateBtn.textContent = 'Generate Passwords';
+  if (mode === 'username') toolsGenerateBtn.textContent = 'Generate Usernames';
+
   bulkResultsEl.hidden = true;
   bulkResultsEl.innerHTML = '';
   usernameResultsEl.hidden = true;
   usernameResultsEl.innerHTML = '';
-  toolsResultsActions.hidden = true;
-  toolsWarning.hidden = true;
-}
+  libraryResultsEl.hidden = true;
+  libraryResultsEl.innerHTML = '';
 
-async function handleToolsCopy(text) {
-  try {
-    const succeeded = await copyToClipboard(text);
-    showToast(
-      app,
-      succeeded ? 'Copied to clipboard' : 'Copy failed — please try again',
-      succeeded ? 'success' : 'error'
-    );
-    return succeeded;
-  } catch {
-    showToast(app, 'Copy failed — please try again', 'error');
-    return false;
+  toolsResultsActions.hidden = true;
+  toolsLibraryActions.hidden = true;
+  toolsWarning.hidden = true;
+
+  if (isLibraryMode) {
+    refreshLibraryPanel();
   }
 }
 
@@ -512,20 +625,78 @@ function handleToolsGenerate() {
     usernameResultsEl.hidden = true;
     usernameResultsEl.innerHTML = '';
     bulkResultsEl.hidden = false;
-    renderBulkList(bulkResultsEl, passwords, { onCopy: handleToolsCopy });
+    renderBulkList(bulkResultsEl, passwords, { onCopy: copyPassword });
     return;
   }
 
-  const usernames = generateUsernames(activeUsernameStyle);
-  toolsWarning.hidden = true;
-  toolsResultsActions.hidden = false;
-  bulkResultsEl.hidden = true;
-  bulkResultsEl.innerHTML = '';
-  usernameResultsEl.hidden = false;
-  renderUsernames(usernameResultsEl, usernames, {
-    onCopy: handleToolsCopy,
-    onRegenerate: () => generateOneUsername(activeUsernameStyle),
+  if (activeToolsMode === 'username') {
+    const usernames = generateUsernames(activeUsernameStyle);
+    toolsWarning.hidden = true;
+    toolsResultsActions.hidden = false;
+    bulkResultsEl.hidden = true;
+    bulkResultsEl.innerHTML = '';
+    usernameResultsEl.hidden = false;
+    renderUsernames(usernameResultsEl, usernames, {
+      onCopy: copyPassword,
+      onRegenerate: () => generateOneUsername(activeUsernameStyle),
+    });
+  }
+}
+
+async function refreshLibraryPanel() {
+  const isFavoritesMode = activeToolsMode === 'favorites';
+  const entries = isFavoritesMode ? await loadFavorites() : await loadRecent();
+
+  toolsLibraryActions.hidden = entries.length === 0;
+  libraryResultsEl.hidden = false;
+
+  renderLibraryList(libraryResultsEl, entries, {
+    isFavoriteMode: isFavoritesMode,
+    emptyMessage: isFavoritesMode
+      ? 'No favorites yet. Tap the star icon next to any password to save it here.'
+      : 'Nothing copied yet. Passwords you copy will show up here.',
+    onCopy: copyPassword,
+    onGenerateSimilar: generateSimilarPassword,
+    onToggleFavorite: async (password) => {
+      await addFavorite(password);
+      showToast(app, 'Added to Favorites', 'success');
+    },
+    onRemove: async (password) => {
+      await removeFavorite(password);
+      showToast(app, 'Removed from Favorites', 'success');
+      await refreshLibraryPanel();
+    },
   });
+}
+
+async function getCurrentLibraryPasswords() {
+  const entries = activeToolsMode === 'favorites' ? await loadFavorites() : await loadRecent();
+  return entries.map((entry) => entry.password);
+}
+
+async function handleExportTxt() {
+  const passwords = await getCurrentLibraryPasswords();
+  if (passwords.length === 0) return;
+  downloadFile(`keypilot-${activeToolsMode}.txt`, toTxt(passwords), 'text/plain');
+  showToast(app, 'Exported as TXT', 'success');
+}
+
+async function handleExportCsv() {
+  const passwords = await getCurrentLibraryPasswords();
+  if (passwords.length === 0) return;
+  downloadFile(`keypilot-${activeToolsMode}.csv`, toCsv(passwords), 'text/csv');
+  showToast(app, 'Exported as CSV', 'success');
+}
+
+async function handleClearLibrary() {
+  if (activeToolsMode === 'favorites') {
+    await clearFavorites();
+    showToast(app, 'Favorites cleared', 'success');
+  } else {
+    await clearRecent();
+    showToast(app, 'Recent cleared', 'success');
+  }
+  await refreshLibraryPanel();
 }
 
 async function handleToolsCopyAll() {
@@ -588,6 +759,37 @@ async function loadAboutVersion() {
   }
 }
 
+// In-popup keyboard shortcuts (only while the Generator screen is active and
+// focus isn't in a text field, so typing in any input is never intercepted):
+// G = generate, C = copy, F = toggle favorite.
+function isTypingContext() {
+  const tag = document.activeElement && document.activeElement.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+}
+
+function handleKeyboardShortcut(event) {
+  if (isTypingContext()) return;
+  if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+  if (screens.generator.hidden) return;
+
+  switch (event.key.toLowerCase()) {
+    case 'g':
+      event.preventDefault();
+      renderPassword();
+      break;
+    case 'c':
+      event.preventDefault();
+      handleCopy();
+      break;
+    case 'f':
+      event.preventDefault();
+      handleFavoriteToggle();
+      break;
+    default:
+      break;
+  }
+}
+
 async function init() {
   settings = await loadSettings();
   applySettingsToControls();
@@ -595,6 +797,7 @@ async function init() {
 
   generateBtn.addEventListener('click', renderPassword);
   copyBtn.addEventListener('click', handleCopy);
+  favoriteBtn.addEventListener('click', handleFavoriteToggle);
 
   lengthInput.addEventListener('change', handleLengthInputChange);
   lengthSlider.addEventListener('input', handleLengthSliderInput);
@@ -626,6 +829,13 @@ async function init() {
   checkerToggleBtn.addEventListener('click', handleCheckerToggleVisibility);
   checkerGenerateBtn.addEventListener('click', handleCheckerGenerate);
 
+  switchCheckerMode('check');
+  checkerModeSelect.addEventListener('change', () => switchCheckerMode(checkerModeSelect.value));
+  compareInputA.addEventListener('input', runCompareAnalysis);
+  compareInputB.addEventListener('input', runCompareAnalysis);
+  compareToggleA.addEventListener('click', () => handleCompareToggleVisibility(compareInputA, compareToggleA));
+  compareToggleB.addEventListener('click', () => handleCompareToggleVisibility(compareInputB, compareToggleB));
+
   switchToolsMode(activeToolsMode);
   toolsModeSelect.addEventListener('change', () => switchToolsMode(toolsModeSelect.value));
   quantityBtns.forEach((btn) => btn.addEventListener('click', () => handleQuantitySelect(btn)));
@@ -633,11 +843,16 @@ async function init() {
   toolsGenerateBtn.addEventListener('click', handleToolsGenerate);
   toolsCopyAllBtn.addEventListener('click', handleToolsCopyAll);
   toolsRefreshAllBtn.addEventListener('click', handleToolsGenerate);
+  toolsExportTxtBtn.addEventListener('click', handleExportTxt);
+  toolsExportCsvBtn.addEventListener('click', handleExportCsv);
+  toolsClearLibraryBtn.addEventListener('click', handleClearLibrary);
 
   rememberToggle.checked = await loadRememberPreferences();
   rememberToggle.addEventListener('change', handleRememberToggle);
   resetSettingsBtn.addEventListener('click', handleResetSettings);
   await loadAboutVersion();
+
+  document.addEventListener('keydown', handleKeyboardShortcut);
 
   Object.keys(navItems).forEach((key) => {
     navItems[key].addEventListener('click', () => switchScreen(key));

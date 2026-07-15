@@ -1,6 +1,6 @@
 import { getSuggestionStrength } from '../lib/smartPassword.js';
 
-export function renderSuggestions(container, passwords, { onCopy, onRegenerate }) {
+export function renderSuggestions(container, passwords, { onCopy, onRegenerate, onFavorite }) {
   container.innerHTML = '';
 
   passwords.forEach((initialPassword) => {
@@ -39,6 +39,12 @@ export function renderSuggestions(container, passwords, { onCopy, onRegenerate }
     regenBtn.textContent = 'Regenerate';
     regenBtn.setAttribute('aria-label', 'Regenerate this suggestion');
 
+    const favBtn = document.createElement('button');
+    favBtn.type = 'button';
+    favBtn.className = 'suggestion-card__btn suggestion-card__btn--icon';
+    favBtn.textContent = '☆';
+    favBtn.setAttribute('aria-label', 'Add to favorites');
+
     function applyMeta() {
       const { label } = getSuggestionStrength(password);
       strengthEl.textContent = label;
@@ -66,9 +72,19 @@ export function renderSuggestions(container, passwords, { onCopy, onRegenerate }
       applyMeta();
     });
 
+    favBtn.addEventListener('click', async () => {
+      await onFavorite(password);
+      favBtn.textContent = '★';
+      favBtn.classList.add('suggestion-card__btn--copied');
+      setTimeout(() => {
+        favBtn.textContent = '☆';
+        favBtn.classList.remove('suggestion-card__btn--copied');
+      }, 1500);
+    });
+
     applyMeta();
     meta.append(strengthEl, lengthEl);
-    actions.append(copyBtn, regenBtn);
+    actions.append(copyBtn, regenBtn, favBtn);
     row.append(meta, actions);
     card.append(pwdEl, row);
     container.appendChild(card);
