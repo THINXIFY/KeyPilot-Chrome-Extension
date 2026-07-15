@@ -58,15 +58,16 @@
       </div>
 
       <div class="control control--presets">
-        <span class="control__label">Presets</span>
-        <div class="preset-grid">
-          <button type="button" class="preset-btn" data-preset="banking">Banking</button>
-          <button type="button" class="preset-btn" data-preset="email">Email</button>
-          <button type="button" class="preset-btn" data-preset="social">Social</button>
-          <button type="button" class="preset-btn" data-preset="work">Work</button>
-          <button type="button" class="preset-btn" data-preset="gaming">Gaming</button>
-          <button type="button" class="preset-btn" data-preset="developer">Developer</button>
-        </div>
+        <label class="control__label" for="preset-select">Presets</label>
+        <select id="preset-select" class="select">
+          <option value="">Custom</option>
+          <option value="banking">Banking</option>
+          <option value="email">Email</option>
+          <option value="social">Social</option>
+          <option value="work">Work</option>
+          <option value="gaming">Gaming</option>
+          <option value="developer">Developer</option>
+        </select>
       </div>
 
       <div class="control">

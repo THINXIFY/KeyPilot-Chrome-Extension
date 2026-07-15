@@ -35,7 +35,7 @@ const toggleInputs = {
 };
 const excludeSimilarInput = document.getElementById('toggle-exclude-similar');
 const excludeCharsInput = document.getElementById('exclude-chars-input');
-const presetBtns = Array.from(document.querySelectorAll('.preset-btn'));
+const presetSelect = document.getElementById('preset-select');
 
 const smartModeSelect = document.getElementById('smart-mode-select');
 const modePanels = {
@@ -167,7 +167,7 @@ function persistSettings() {
 }
 
 function clearActivePreset() {
-  presetBtns.forEach((btn) => btn.classList.remove('preset-btn--active'));
+  presetSelect.value = '';
 }
 
 function handleToggleChange() {
@@ -194,15 +194,14 @@ function handleLengthSliderInput() {
   persistSettings();
 }
 
-function handlePresetSelect(btn) {
-  const presetSettings = getPresetSettings(btn.dataset.preset);
+function handlePresetSelect() {
+  const presetSettings = getPresetSettings(presetSelect.value);
   if (!presetSettings) return;
 
   settings = { ...settings, ...presetSettings };
   applySettingsToControls();
   renderPassword();
   persistSettings();
-  presetBtns.forEach((b) => b.classList.toggle('preset-btn--active', b === btn));
 }
 
 const COPY_LABEL = 'Copy';
@@ -424,7 +423,7 @@ async function init() {
   toggleInputs.symbols.addEventListener('change', handleToggleChange);
   excludeSimilarInput.addEventListener('change', handleToggleChange);
   excludeCharsInput.addEventListener('input', handleToggleChange);
-  presetBtns.forEach((btn) => btn.addEventListener('click', () => handlePresetSelect(btn)));
+  presetSelect.addEventListener('change', handlePresetSelect);
 
   const savedSmartMode = await loadSmartMode();
   smartModeSelect.value = savedSmartMode;

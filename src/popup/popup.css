@@ -723,39 +723,6 @@ body {
   margin-bottom: var(--space-2);
 }
 
-.preset-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: var(--space-2);
-}
-
-.preset-btn {
-  border: 1px solid var(--color-card-border);
-  background: var(--color-card-bg);
-  color: var(--color-text-muted);
-  border-radius: var(--radius-sm);
-  padding: var(--space-2);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: border-color var(--transition-fast), color var(--transition-fast), background-color var(--transition-fast);
-}
-
-.preset-btn:hover {
-  color: var(--color-text);
-}
-
-.preset-btn--active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-heading);
-}
-
-.preset-btn:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 1px;
-}
-
 .checker-input-row {
   display: flex;
   gap: var(--space-2);
