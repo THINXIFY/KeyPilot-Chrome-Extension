@@ -47,6 +47,27 @@ fully configurable passwords.
   "coming soon" placeholders — no functionality is implemented yet;
   they're scaffolding for later phases
 
+**Phase 2.2 — Advanced Password Modes**
+- The **Smart** screen now has a single **Mode** selector covering 6
+  modes: **From Name**, **From Words**, **Memorable**, **Passphrase**,
+  **Pronounceable**, and **Theme-Based** — only the fields relevant to
+  the selected mode are shown
+- **Memorable**: 2 readable dictionary words + digits + a symbol,
+  generated automatically
+- **Passphrase**: 3–8 words (adjustable), joined with a chosen
+  separator (`-`, `_`, `.`, or space), with optional numbers and
+  symbols; each suggestion shows both its strength and its length
+- **Pronounceable**: consonant-vowel syllables mixed with digits and a
+  symbol for an easy-to-read but secure password
+- **Theme-Based**: pick a theme (Nature, Space, Ocean, Cyber, Fantasy)
+  to generate suggestions from that theme's word list
+- Every mode produces 5 unique suggestions, each with its own strength
+  label, length, **Copy** (with confirmation), and **Regenerate**
+- **Copy All** copies every currently shown suggestion at once;
+  **Refresh All** regenerates the full set
+- The selected mode is remembered and restored the next time the
+  popup opens — the name/word/theme input itself is never saved
+
 ## Installation (load unpacked)
 
 1. Open `chrome://extensions` in Chrome.
@@ -71,10 +92,12 @@ fully configurable passwords.
    character type is turned off (or exclusions remove all available
    characters), a warning appears and Generate/Copy are disabled until
    you re-enable at least one character type.
-4. On **Smart**: pick **From Name** or **From Words**, fill in the
-   field(s), and click **Generate Suggestions** to get 5 memorable,
-   secure password suggestions. Use **Copy** on any suggestion, or
-   **Regenerate** to get a new one in its place.
+4. On **Smart**: choose a **Mode** (From Name, From Words, Memorable,
+   Passphrase, Pronounceable, or Theme-Based), fill in any fields shown
+   for that mode, and click **Generate Suggestions** to get 5 secure
+   suggestions. Use **Copy** or **Regenerate** on any single suggestion,
+   or **Copy All** / **Refresh All** for the whole set. The mode you
+   last used is remembered the next time you open the popup.
 
 ## Project structure
 
@@ -88,11 +111,18 @@ Password Generator - Chrome Extension/
 │   │   ├── popup.css           # popup styling
 │   │   └── popup.js            # wires UI to lib/component modules
 │   ├── lib/
-│   │   ├── passwordGenerator.js  # pure, crypto-secure, configurable generation
-│   │   ├── passwordStrength.js   # pure strength estimation
-│   │   ├── settingsStorage.js    # chrome.storage.local wrapper
-│   │   ├── smartPassword.js      # pure name/word-based suggestion generation
-│   │   └── clipboard.js          # copy-to-clipboard helper
+│   │   ├── passwordGenerator.js    # pure, crypto-secure, configurable generation
+│   │   ├── passwordStrength.js     # pure strength estimation
+│   │   ├── settingsStorage.js      # chrome.storage.local wrapper (settings + smart mode)
+│   │   ├── smartPassword.js        # From Name / From Words suggestion generation
+│   │   ├── memorablePassword.js    # Memorable mode
+│   │   ├── passphrase.js           # Passphrase mode
+│   │   ├── pronounceablePassword.js # Pronounceable mode
+│   │   ├── themePassword.js        # Theme-Based mode
+│   │   ├── randomUtils.js          # shared crypto-random helpers
+│   │   ├── charsets.js             # shared digit/symbol charsets
+│   │   ├── wordLists.js            # shared common + per-theme word lists
+│   │   └── clipboard.js            # copy-to-clipboard helper
 │   └── components/
 │       ├── toast.js              # reusable toast notification
 │       ├── strengthMeter.js      # strength bar + label + count
@@ -101,7 +131,11 @@ Password Generator - Chrome Extension/
 │   ├── passwordGenerator.test.js
 │   ├── passwordStrength.test.js
 │   ├── settingsStorage.test.js
-│   └── smartPassword.test.js
+│   ├── smartPassword.test.js
+│   ├── memorablePassword.test.js
+│   ├── passphrase.test.js
+│   ├── pronounceablePassword.test.js
+│   └── themePassword.test.js
 └── icons/                        # reserved for future icon assets
 ```
 
@@ -117,6 +151,6 @@ npm test
 
 ## Roadmap
 
-Future phases may add password history, passphrase generation, a
-checker for pasted-in passwords, a username generator, and visual
-themes. These remain intentionally out of scope for now.
+Future phases may add password history, a checker for pasted-in
+passwords, a username generator, and cloud sync. These remain
+intentionally out of scope for now.
