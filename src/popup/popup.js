@@ -1,6 +1,6 @@
 import { generatePassword, MIN_LENGTH, MAX_LENGTH } from '../lib/passwordGenerator.js';
 import { calculateStrength } from '../lib/passwordStrength.js';
-import { loadSettings, saveSettings } from '../lib/settingsStorage.js';
+import { loadSettings, saveSettings, loadSmartMode, saveSmartMode } from '../lib/settingsStorage.js';
 import { copyToClipboard } from '../lib/clipboard.js';
 import {
   generateFromName,
@@ -8,6 +8,10 @@ import {
   generateOneFromName,
   generateOneFromWords,
 } from '../lib/smartPassword.js';
+import { generateMemorable, generateOneMemorable } from '../lib/memorablePassword.js';
+import { generatePassphrase, generateOnePassphrase } from '../lib/passphrase.js';
+import { generatePronounceable, generateOnePronounceable } from '../lib/pronounceablePassword.js';
+import { generateThemed, generateOneThemed } from '../lib/themePassword.js';
 import { showToast } from '../components/toast.js';
 import { updateStrengthMeter } from '../components/strengthMeter.js';
 import { renderSuggestions } from '../components/smartResults.js';
@@ -30,18 +34,31 @@ const toggleInputs = {
 const excludeSimilarInput = document.getElementById('toggle-exclude-similar');
 const excludeCharsInput = document.getElementById('exclude-chars-input');
 
-const tabNameBtn = document.getElementById('tab-name');
-const tabWordsBtn = document.getElementById('tab-words');
-const panelName = document.getElementById('panel-name');
-const panelWords = document.getElementById('panel-words');
+const smartModeSelect = document.getElementById('smart-mode-select');
+const modePanels = {
+  name: document.getElementById('panel-name'),
+  words: document.getElementById('panel-words'),
+  memorable: document.getElementById('panel-memorable'),
+  passphrase: document.getElementById('panel-passphrase'),
+  pronounceable: document.getElementById('panel-pronounceable'),
+  theme: document.getElementById('panel-theme'),
+};
 const smartNameInput = document.getElementById('smart-name-input');
 const smartWordInputs = [
   document.getElementById('smart-word-1'),
   document.getElementById('smart-word-2'),
   document.getElementById('smart-word-3'),
 ];
+const passphraseWordCountInput = document.getElementById('passphrase-word-count');
+const separatorBtns = Array.from(document.querySelectorAll('.separator-btn'));
+const passphraseNumbersInput = document.getElementById('passphrase-numbers');
+const passphraseSymbolsInput = document.getElementById('passphrase-symbols');
+const themeBtns = Array.from(document.querySelectorAll('.theme-btn'));
 const smartGenerateBtn = document.getElementById('smart-generate-btn');
 const smartWarning = document.getElementById('smart-warning');
+const smartResultsActions = document.getElementById('smart-results-actions');
+const smartCopyAllBtn = document.getElementById('smart-copy-all-btn');
+const smartRefreshAllBtn = document.getElementById('smart-refresh-all-btn');
 const smartResults = document.getElementById('smart-results');
 
 const navItems = {
@@ -59,7 +76,9 @@ const screens = {
 
 let settings = null;
 let saveTimeoutId = null;
-let activeSmartTab = 'name';
+let activeSmartMode = 'name';
+let activeSeparator = '-';
+let activeTheme = 'nature';
 
 function switchScreen(name) {
   Object.keys(screens).forEach((key) => {
@@ -182,24 +201,58 @@ async function handleCopy() {
   }
 }
 
-function switchSmartTab(tab) {
-  activeSmartTab = tab;
-  const isName = tab === 'name';
-  tabNameBtn.classList.toggle('tab--active', isName);
-  tabWordsBtn.classList.toggle('tab--active', !isName);
-  tabNameBtn.setAttribute('aria-selected', String(isName));
-  tabWordsBtn.setAttribute('aria-selected', String(!isName));
-  panelName.hidden = !isName;
-  panelWords.hidden = isName;
+function readPassphraseOptions() {
+  const parsed = Number.parseInt(passphraseWordCountInput.value, 10);
+  return {
+    wordCount: Number.isNaN(parsed) ? undefined : parsed,
+    separator: activeSeparator,
+    numbers: passphraseNumbersInput.checked,
+    symbols: passphraseSymbolsInput.checked,
+  };
+}
+
+function generateForActiveMode() {
+  switch (activeSmartMode) {
+    case 'name': return generateFromName(smartNameInput.value);
+    case 'words': return generateFromWords(smartWordInputs.map((input) => input.value));
+    case 'memorable': return generateMemorable();
+    case 'passphrase': return generatePassphrase(readPassphraseOptions());
+    case 'pronounceable': return generatePronounceable();
+    case 'theme': return generateThemed(activeTheme);
+    default: return null;
+  }
+}
+
+function regenerateOneForActiveMode() {
+  switch (activeSmartMode) {
+    case 'name': return generateOneFromName(smartNameInput.value);
+    case 'words': return generateOneFromWords(smartWordInputs.map((input) => input.value));
+    case 'memorable': return generateOneMemorable();
+    case 'passphrase': return generateOnePassphrase(readPassphraseOptions());
+    case 'pronounceable': return generateOnePronounceable();
+    case 'theme': return generateOneThemed(activeTheme);
+    default: return null;
+  }
+}
+
+function switchSmartMode(mode) {
+  activeSmartMode = mode;
+  Object.keys(modePanels).forEach((key) => {
+    modePanels[key].hidden = key !== mode;
+  });
   smartResults.innerHTML = '';
+  smartResultsActions.hidden = true;
   smartWarning.hidden = true;
   updateSmartGenerateState();
+  saveSmartMode(mode);
 }
 
 function updateSmartGenerateState() {
-  const valid = activeSmartTab === 'name'
+  const valid = activeSmartMode === 'name'
     ? /[a-zA-Z0-9]/.test(smartNameInput.value)
-    : smartWordInputs.some((input) => input.value.trim().length > 0);
+    : activeSmartMode === 'words'
+      ? smartWordInputs.some((input) => input.value.trim().length > 0)
+      : true;
   smartGenerateBtn.disabled = !valid;
 }
 
@@ -218,28 +271,49 @@ async function handleSuggestionCopy(password) {
   }
 }
 
-function regenerateActiveSuggestion() {
-  return activeSmartTab === 'name'
-    ? generateOneFromName(smartNameInput.value)
-    : generateOneFromWords(smartWordInputs.map((input) => input.value));
-}
-
 function handleSmartGenerate() {
-  const passwords = activeSmartTab === 'name'
-    ? generateFromName(smartNameInput.value)
-    : generateFromWords(smartWordInputs.map((input) => input.value));
+  const passwords = generateForActiveMode();
 
   if (!passwords || passwords.length === 0) {
     smartWarning.hidden = false;
+    smartResultsActions.hidden = true;
     smartResults.innerHTML = '';
     return;
   }
 
   smartWarning.hidden = true;
+  smartResultsActions.hidden = false;
   renderSuggestions(smartResults, passwords, {
     onCopy: handleSuggestionCopy,
-    onRegenerate: regenerateActiveSuggestion,
+    onRegenerate: regenerateOneForActiveMode,
   });
+}
+
+async function handleCopyAll() {
+  const passwords = Array.from(smartResults.querySelectorAll('.suggestion-card__password'))
+    .map((el) => el.textContent);
+  if (passwords.length === 0) return;
+
+  try {
+    const succeeded = await copyToClipboard(passwords.join('\n'));
+    showToast(
+      app,
+      succeeded ? `Copied ${passwords.length} passwords` : 'Copy failed — please try again',
+      succeeded ? 'success' : 'error'
+    );
+  } catch {
+    showToast(app, 'Copy failed — please try again', 'error');
+  }
+}
+
+function handleSeparatorChange(btn) {
+  activeSeparator = btn.dataset.separator;
+  separatorBtns.forEach((b) => b.classList.toggle('separator-btn--active', b === btn));
+}
+
+function handleThemeChange(btn) {
+  activeTheme = btn.dataset.theme;
+  themeBtns.forEach((b) => b.classList.toggle('theme-btn--active', b === btn));
 }
 
 async function init() {
@@ -260,12 +334,19 @@ async function init() {
   excludeSimilarInput.addEventListener('change', handleToggleChange);
   excludeCharsInput.addEventListener('input', handleToggleChange);
 
-  tabNameBtn.addEventListener('click', () => switchSmartTab('name'));
-  tabWordsBtn.addEventListener('click', () => switchSmartTab('words'));
+  const savedSmartMode = await loadSmartMode();
+  smartModeSelect.value = savedSmartMode;
+  switchSmartMode(savedSmartMode);
+
+  smartModeSelect.addEventListener('change', () => switchSmartMode(smartModeSelect.value));
   smartNameInput.addEventListener('input', updateSmartGenerateState);
   smartWordInputs.forEach((input) => input.addEventListener('input', updateSmartGenerateState));
   smartGenerateBtn.addEventListener('click', handleSmartGenerate);
-  updateSmartGenerateState();
+  smartCopyAllBtn.addEventListener('click', handleCopyAll);
+  smartRefreshAllBtn.addEventListener('click', handleSmartGenerate);
+
+  separatorBtns.forEach((btn) => btn.addEventListener('click', () => handleSeparatorChange(btn)));
+  themeBtns.forEach((btn) => btn.addEventListener('click', () => handleThemeChange(btn)));
 
   Object.keys(navItems).forEach((key) => {
     navItems[key].addEventListener('click', () => switchScreen(key));

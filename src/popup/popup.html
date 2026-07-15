@@ -145,14 +145,21 @@
     </section>
 
     <section id="screen-smart" class="screen" role="tabpanel" aria-labelledby="nav-smart" hidden>
-      <p class="screen__subtitle">Generate a memorable password from a name or your own words.</p>
+      <p class="screen__subtitle">Generate a memorable password from a name, words, or a theme.</p>
 
-      <div class="tabs" role="tablist">
-        <button id="tab-name" class="tab tab--active" type="button" role="tab" aria-selected="true">From Name</button>
-        <button id="tab-words" class="tab" type="button" role="tab" aria-selected="false">From Words</button>
+      <div class="field">
+        <label class="field__label" for="smart-mode-select">Mode</label>
+        <select id="smart-mode-select" class="select">
+          <option value="name">From Name</option>
+          <option value="words">From Words</option>
+          <option value="memorable">Memorable</option>
+          <option value="passphrase">Passphrase</option>
+          <option value="pronounceable">Pronounceable</option>
+          <option value="theme">Theme-Based</option>
+        </select>
       </div>
 
-      <div id="panel-name" class="tab-panel" role="tabpanel">
+      <div id="panel-name" class="mode-panel">
         <label class="field__label" for="smart-name-input">Name, nickname, or initials</label>
         <input
           id="smart-name-input"
@@ -165,12 +172,70 @@
         />
       </div>
 
-      <div id="panel-words" class="tab-panel" role="tabpanel" hidden>
+      <div id="panel-words" class="mode-panel" hidden>
         <label class="field__label" for="smart-word-1">Words (up to 3)</label>
         <div class="word-inputs">
           <input id="smart-word-1" class="field__input" type="text" placeholder="Word 1" autocomplete="off" spellcheck="false" maxlength="20" />
           <input id="smart-word-2" class="field__input" type="text" placeholder="Word 2 (optional)" autocomplete="off" spellcheck="false" maxlength="20" />
           <input id="smart-word-3" class="field__input" type="text" placeholder="Word 3 (optional)" autocomplete="off" spellcheck="false" maxlength="20" />
+        </div>
+      </div>
+
+      <div id="panel-memorable" class="mode-panel" hidden>
+        <p class="mode-panel__hint">Combines two readable words with numbers and a symbol — generated automatically.</p>
+      </div>
+
+      <div id="panel-passphrase" class="mode-panel" hidden>
+        <div class="control__header">
+          <label class="control__label" for="passphrase-word-count">Words</label>
+          <input
+            id="passphrase-word-count"
+            class="length-input"
+            type="number"
+            min="3"
+            max="8"
+            step="1"
+            value="4"
+            inputmode="numeric"
+          />
+        </div>
+
+        <div class="field">
+          <span class="field__label">Separator</span>
+          <div class="separator-group" role="group" aria-label="Separator">
+            <button type="button" class="separator-btn separator-btn--active" data-separator="-">-</button>
+            <button type="button" class="separator-btn" data-separator="_">_</button>
+            <button type="button" class="separator-btn" data-separator=".">.</button>
+            <button type="button" class="separator-btn" data-separator=" ">Space</button>
+          </div>
+        </div>
+
+        <div class="toggle-grid toggle-grid--pair">
+          <label class="toggle">
+            <input id="passphrase-numbers" type="checkbox" />
+            <span class="toggle__switch" aria-hidden="true"></span>
+            <span class="toggle__label">Add numbers</span>
+          </label>
+          <label class="toggle">
+            <input id="passphrase-symbols" type="checkbox" />
+            <span class="toggle__switch" aria-hidden="true"></span>
+            <span class="toggle__label">Add symbols</span>
+          </label>
+        </div>
+      </div>
+
+      <div id="panel-pronounceable" class="mode-panel" hidden>
+        <p class="mode-panel__hint">Generates an easy-to-read, pronounceable password automatically.</p>
+      </div>
+
+      <div id="panel-theme" class="mode-panel" hidden>
+        <span class="field__label">Theme</span>
+        <div class="theme-grid" role="group" aria-label="Theme">
+          <button type="button" class="theme-btn theme-btn--active" data-theme="nature">Nature</button>
+          <button type="button" class="theme-btn" data-theme="space">Space</button>
+          <button type="button" class="theme-btn" data-theme="ocean">Ocean</button>
+          <button type="button" class="theme-btn" data-theme="cyber">Cyber</button>
+          <button type="button" class="theme-btn" data-theme="fantasy">Fantasy</button>
         </div>
       </div>
 
@@ -180,6 +245,11 @@
 
       <div id="smart-warning" class="warning-banner" hidden>
         Enter a name or at least one word to generate suggestions.
+      </div>
+
+      <div id="smart-results-actions" class="smart-results-actions" hidden>
+        <button id="smart-copy-all-btn" class="suggestion-card__btn" type="button">Copy All</button>
+        <button id="smart-refresh-all-btn" class="suggestion-card__btn suggestion-card__btn--secondary" type="button">Refresh All</button>
       </div>
 
       <div id="smart-results" class="smart-results"></div>

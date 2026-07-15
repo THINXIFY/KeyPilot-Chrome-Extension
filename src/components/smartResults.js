@@ -9,12 +9,21 @@ export function renderSuggestions(container, passwords, { onCopy, onRegenerate }
     const card = document.createElement('div');
     card.className = 'suggestion-card';
 
-    const pwdEl = document.createElement('span');
+    const pwdEl = document.createElement('div');
     pwdEl.className = 'suggestion-card__password';
     pwdEl.textContent = password;
 
+    const row = document.createElement('div');
+    row.className = 'suggestion-card__row';
+
+    const meta = document.createElement('div');
+    meta.className = 'suggestion-card__meta';
+
     const strengthEl = document.createElement('span');
     strengthEl.className = 'suggestion-card__strength';
+
+    const lengthEl = document.createElement('span');
+    lengthEl.className = 'suggestion-card__length';
 
     const actions = document.createElement('div');
     actions.className = 'suggestion-card__actions';
@@ -30,10 +39,11 @@ export function renderSuggestions(container, passwords, { onCopy, onRegenerate }
     regenBtn.textContent = 'Regenerate';
     regenBtn.setAttribute('aria-label', 'Regenerate this suggestion');
 
-    function applyStrength() {
+    function applyMeta() {
       const { label } = getSuggestionStrength(password);
       strengthEl.textContent = label;
       strengthEl.className = `suggestion-card__strength suggestion-card__strength--${label.toLowerCase()}`;
+      lengthEl.textContent = `${password.length} chars`;
     }
 
     copyBtn.addEventListener('click', async () => {
@@ -53,12 +63,14 @@ export function renderSuggestions(container, passwords, { onCopy, onRegenerate }
       if (!next) return;
       password = next;
       pwdEl.textContent = password;
-      applyStrength();
+      applyMeta();
     });
 
-    applyStrength();
+    applyMeta();
+    meta.append(strengthEl, lengthEl);
     actions.append(copyBtn, regenBtn);
-    card.append(pwdEl, strengthEl, actions);
+    row.append(meta, actions);
+    card.append(pwdEl, row);
     container.appendChild(card);
   });
 }
