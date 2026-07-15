@@ -571,11 +571,20 @@ async function handleResetSettings() {
   showToast(app, 'All settings reset to defaults', 'success');
 }
 
-function loadAboutVersion() {
+async function loadAboutVersion() {
   try {
     aboutVersionEl.textContent = `v${chrome.runtime.getManifest().version}`;
+    return;
   } catch {
-    aboutVersionEl.textContent = 'v1.3.0';
+    // chrome.runtime is unavailable outside a real extension context.
+  }
+
+  try {
+    const response = await fetch('../../manifest.json');
+    const manifest = await response.json();
+    aboutVersionEl.textContent = `v${manifest.version}`;
+  } catch {
+    aboutVersionEl.textContent = '';
   }
 }
 
@@ -628,7 +637,7 @@ async function init() {
   rememberToggle.checked = await loadRememberPreferences();
   rememberToggle.addEventListener('change', handleRememberToggle);
   resetSettingsBtn.addEventListener('click', handleResetSettings);
-  loadAboutVersion();
+  await loadAboutVersion();
 
   Object.keys(navItems).forEach((key) => {
     navItems[key].addEventListener('click', () => switchScreen(key));
