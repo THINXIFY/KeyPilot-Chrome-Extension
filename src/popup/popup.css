@@ -675,6 +675,12 @@ body {
   outline-offset: 1px;
 }
 
+.style-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
 .smart-password__generate {
   width: 100%;
 }
@@ -722,6 +728,10 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
+}
+
+.suggestion-card__row--end {
+  justify-content: flex-end;
 }
 
 .suggestion-card__meta {
@@ -926,6 +936,97 @@ body {
 .checker-list__item--positive::before {
   content: '✓';
   color: var(--color-success);
+}
+
+.bulk-results {
+  display: flex;
+  flex-direction: column;
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  background: var(--color-card-bg);
+}
+
+.bulk-results[hidden] {
+  display: none;
+}
+
+.bulk-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.bulk-row:last-child {
+  border-bottom: none;
+}
+
+.bulk-row__password {
+  overflow-x: auto;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text);
+}
+
+.bulk-row__copy {
+  flex-shrink: 0;
+  border: 1px solid var(--color-card-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.bulk-row__copy:hover {
+  border-color: var(--color-primary);
+  color: var(--color-heading);
+}
+
+.bulk-row__copy:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.bulk-row__copy--copied {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-heading);
+}
+
+.settings-card__heading {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.about-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.about-row__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.about-row__version {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--color-text-muted);
 }
 
 .toast {

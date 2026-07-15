@@ -29,6 +29,7 @@
     <nav class="app__nav" role="tablist" aria-label="Sections">
       <button id="nav-generator" class="app__nav-item app__nav-item--active" type="button" role="tab" aria-selected="true" aria-controls="screen-generator">Generator</button>
       <button id="nav-smart" class="app__nav-item" type="button" role="tab" aria-selected="false" aria-controls="screen-smart">Smart</button>
+      <button id="nav-tools" class="app__nav-item" type="button" role="tab" aria-selected="false" aria-controls="screen-tools">Tools</button>
       <button id="nav-checker" class="app__nav-item" type="button" role="tab" aria-selected="false" aria-controls="screen-checker">Checker</button>
       <button id="nav-settings" class="app__nav-item" type="button" role="tab" aria-selected="false" aria-controls="screen-settings">Settings</button>
     </nav>
@@ -270,6 +271,55 @@
       <div id="smart-results" class="smart-results"></div>
     </section>
 
+    <section id="screen-tools" class="screen" role="tabpanel" aria-labelledby="nav-tools" hidden>
+      <p class="screen__subtitle">Generate multiple passwords or usernames at once.</p>
+
+      <div class="field">
+        <label class="field__label" for="tools-mode-select">Mode</label>
+        <select id="tools-mode-select" class="select">
+          <option value="bulk">Bulk Passwords</option>
+          <option value="username">Username Generator</option>
+        </select>
+      </div>
+
+      <div id="panel-bulk" class="mode-panel">
+        <p class="mode-panel__hint">Uses your current Generator settings (length and character types).</p>
+        <div class="field">
+          <span class="field__label">Quantity</span>
+          <div class="separator-group" role="group" aria-label="Quantity">
+            <button type="button" class="separator-btn separator-btn--active" data-quantity="10">10</button>
+            <button type="button" class="separator-btn" data-quantity="25">25</button>
+            <button type="button" class="separator-btn" data-quantity="50">50</button>
+            <button type="button" class="separator-btn" data-quantity="100">100</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-username" class="mode-panel" hidden>
+        <span class="field__label">Style</span>
+        <div class="style-grid" role="group" aria-label="Username style">
+          <button type="button" class="theme-btn theme-btn--active" data-username-style="professional">Professional</button>
+          <button type="button" class="theme-btn" data-username-style="minimal">Minimal</button>
+          <button type="button" class="theme-btn" data-username-style="gaming">Gaming</button>
+          <button type="button" class="theme-btn" data-username-style="developer">Developer</button>
+        </div>
+      </div>
+
+      <button id="tools-generate-btn" class="btn btn--primary" type="button">Generate Passwords</button>
+
+      <div id="tools-warning" class="warning-banner" hidden>
+        Select at least one character type on the Generator screen to generate passwords.
+      </div>
+
+      <div id="tools-results-actions" class="smart-results-actions" hidden>
+        <button id="tools-copy-all-btn" class="suggestion-card__btn" type="button">Copy All</button>
+        <button id="tools-refresh-all-btn" class="suggestion-card__btn suggestion-card__btn--secondary" type="button">Refresh All</button>
+      </div>
+
+      <div id="bulk-results" class="bulk-results" hidden></div>
+      <div id="username-results" class="smart-results" hidden></div>
+    </section>
+
     <section id="screen-checker" class="screen" role="tabpanel" aria-labelledby="nav-checker" hidden>
       <p class="screen__subtitle">Check any password's strength, crack time, and get tips to improve it.</p>
 
@@ -330,9 +380,73 @@
       </div>
     </section>
 
-    <section id="screen-settings" class="screen screen--placeholder" role="tabpanel" aria-labelledby="nav-settings" hidden>
-      <p class="placeholder__title">Settings</p>
-      <p class="placeholder__text">Coming soon — customize KeyPilot to your preferences.</p>
+    <section id="screen-settings" class="screen" role="tabpanel" aria-labelledby="nav-settings" hidden>
+      <p class="screen__subtitle">Configure KeyPilot's defaults and privacy preferences.</p>
+
+      <div class="settings-card">
+        <p class="settings-card__heading">Generator defaults</p>
+
+        <div class="control">
+          <div class="control__header">
+            <label class="control__label" for="settings-length-input">Default length</label>
+            <input
+              id="settings-length-input"
+              class="length-input"
+              type="number"
+              min="8"
+              max="64"
+              step="1"
+              value="16"
+              inputmode="numeric"
+            />
+          </div>
+        </div>
+
+        <div class="control">
+          <label class="field__label" for="settings-mode-select">Default Smart mode</label>
+          <select id="settings-mode-select" class="select">
+            <option value="name">From Name</option>
+            <option value="words">From Words</option>
+            <option value="memorable">Memorable</option>
+            <option value="passphrase">Passphrase</option>
+            <option value="pronounceable">Pronounceable</option>
+            <option value="theme">Theme-Based</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <p class="settings-card__heading">Privacy</p>
+
+        <label class="toggle toggle--full">
+          <input id="remember-preferences-toggle" type="checkbox" checked />
+          <span class="toggle__switch" aria-hidden="true"></span>
+          <span class="toggle__label">Remember my preferences on this device</span>
+        </label>
+
+        <p class="mode-panel__hint">
+          When off, KeyPilot won't save your length, character-type, or mode
+          preferences between sessions. Passwords and personal input are
+          never saved either way.
+        </p>
+
+        <button id="reset-settings-btn" class="btn btn--secondary" type="button">Reset All Settings</button>
+      </div>
+
+      <div class="settings-card">
+        <p class="settings-card__heading">About</p>
+
+        <div class="about-row">
+          <span class="about-row__name">KeyPilot</span>
+          <span id="about-version" class="about-row__version"></span>
+        </div>
+
+        <p class="mode-panel__hint">
+          A premium, fully offline password security toolkit. Nothing you
+          type is saved, tracked, or transmitted — only the preferences
+          above, and only while "Remember my preferences" is on.
+        </p>
+      </div>
     </section>
 
     <div class="toast" role="status" aria-live="polite"></div>
