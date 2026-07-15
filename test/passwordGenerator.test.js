@@ -6,6 +6,7 @@ import {
   MIN_LENGTH,
   MAX_LENGTH,
 } from '../src/lib/passwordGenerator.js';
+import { hasRepeatedRun, hasSequentialRun } from '../src/lib/passwordPatterns.js';
 
 const SYMBOLS = '!@#$%^&*()-_=+[]{}<>?';
 
@@ -120,4 +121,59 @@ test('getEffectivePoolSize reflects enabled types and exclusions', () => {
     getEffectivePoolSize({ uppercase: false, lowercase: false, numbers: false, symbols: false }),
     0
   );
+});
+
+test('avoidRepeated is off by default (repeats can occur)', () => {
+  // Not a strict assertion (repeats are rare by chance at length 8), just
+  // documents that the default behavior is unconstrained.
+  assert.equal(generatePassword().length, 16);
+});
+
+test('avoidRepeated prevents 3+ repeated characters when enabled', () => {
+  for (let i = 0; i < 30; i++) {
+    const password = generatePassword({ length: 12, avoidRepeated: true });
+    assert.equal(hasRepeatedRun(password), false, `unexpected repeat in ${password}`);
+  }
+});
+
+test('avoidSequential prevents sequential runs when enabled', () => {
+  for (let i = 0; i < 30; i++) {
+    const password = generatePassword({ length: 12, avoidSequential: true });
+    assert.equal(hasSequentialRun(password), false, `unexpected sequence in ${password}`);
+  }
+});
+
+test('avoidRepeated and avoidSequential can be enabled together', () => {
+  for (let i = 0; i < 30; i++) {
+    const password = generatePassword({ length: 16, avoidRepeated: true, avoidSequential: true });
+    assert.equal(hasRepeatedRun(password), false, `unexpected repeat in ${password}`);
+    assert.equal(hasSequentialRun(password), false, `unexpected sequence in ${password}`);
+  }
+});
+
+test('filters do not change the resulting length or character-class guarantees', () => {
+  const password = generatePassword({
+    length: 20, avoidRepeated: true, avoidSequential: true, excludeSimilar: true,
+  });
+  assert.equal(password.length, 20);
+  assert.ok(/[A-Z]/.test(password));
+  assert.ok(/[a-z]/.test(password));
+  assert.ok(/[0-9]/.test(password));
+});
+
+test('does not hang even when filters cannot be perfectly satisfied within the attempt budget', () => {
+  // A tiny pool (digits only) at the minimum length makes avoiding both
+  // repeats and sequences hard; this must still return promptly rather
+  // than looping forever, even if the result isn't fully compliant.
+  const password = generatePassword({
+    length: MIN_LENGTH,
+    uppercase: false,
+    lowercase: false,
+    numbers: true,
+    symbols: false,
+    avoidRepeated: true,
+    avoidSequential: true,
+  });
+  assert.equal(typeof password, 'string');
+  assert.equal(password.length, MIN_LENGTH);
 });

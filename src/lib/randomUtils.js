@@ -1,7 +1,17 @@
+// Uniform random integer in [0, max) via rejection sampling, so every
+// outcome is equally likely — a plain `% max` skews low values slightly
+// more likely whenever max doesn't evenly divide 2^32.
 export function randomInt(max) {
   const buffer = new Uint32Array(1);
-  crypto.getRandomValues(buffer);
-  return buffer[0] % max;
+  const limit = Math.floor(0x100000000 / max) * max;
+
+  let value;
+  do {
+    crypto.getRandomValues(buffer);
+    value = buffer[0];
+  } while (value >= limit);
+
+  return value % max;
 }
 
 export function shuffle(arr) {

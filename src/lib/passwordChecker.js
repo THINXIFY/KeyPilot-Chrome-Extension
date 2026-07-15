@@ -1,5 +1,6 @@
 import { estimateStrengthFromPassword } from './passwordStrength.js';
 import { generatePassword } from './passwordGenerator.js';
+import { hasRepeatedRun, hasSequentialRun } from './passwordPatterns.js';
 
 const COMMON_PASSWORDS = new Set([
   'password', '123456', '123456789', '12345678', '12345', '1234567', '1234567890',
@@ -21,25 +22,6 @@ const STRONGER_PASSWORD_OPTIONS = {
   excludeSimilar: false,
   excludeChars: '',
 };
-
-function hasRepeatedRun(password) {
-  return /(.)\1{2,}/.test(password);
-}
-
-function hasSequentialRun(password, runLength = 3) {
-  const lower = password.toLowerCase();
-  for (let i = 0; i <= lower.length - runLength; i++) {
-    let ascending = true;
-    let descending = true;
-    for (let j = 1; j < runLength; j++) {
-      const diff = lower.charCodeAt(i + j) - lower.charCodeAt(i + j - 1);
-      if (diff !== 1) ascending = false;
-      if (diff !== -1) descending = false;
-    }
-    if (ascending || descending) return true;
-  }
-  return false;
-}
 
 function isCommonPassword(password) {
   return COMMON_PASSWORDS.has(password.toLowerCase());
