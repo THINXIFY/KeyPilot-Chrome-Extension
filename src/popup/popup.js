@@ -15,15 +15,33 @@ function renderPassword() {
   passwordOutput.classList.add('is-updating');
 }
 
+const COPY_LABEL = 'Copy';
+const COPIED_LABEL = 'Copied ✓';
+let copiedTimeoutId = null;
+
 async function handleCopy() {
   if (!passwordOutput.value) return;
 
-  const succeeded = await copyToClipboard(passwordOutput.value);
-  showToast(
-    app,
-    succeeded ? 'Copied to clipboard' : 'Copy failed — please try again',
-    succeeded ? 'success' : 'error'
-  );
+  try {
+    const succeeded = await copyToClipboard(passwordOutput.value);
+    showToast(
+      app,
+      succeeded ? 'Copied to clipboard' : 'Copy failed — please try again',
+      succeeded ? 'success' : 'error'
+    );
+
+    if (succeeded) {
+      clearTimeout(copiedTimeoutId);
+      copyBtn.textContent = COPIED_LABEL;
+      copyBtn.classList.add('btn--copied');
+      copiedTimeoutId = setTimeout(() => {
+        copyBtn.textContent = COPY_LABEL;
+        copyBtn.classList.remove('btn--copied');
+      }, 1500);
+    }
+  } catch {
+    showToast(app, 'Copy failed — please try again', 'error');
+  }
 }
 
 generateBtn.addEventListener('click', renderPassword);
