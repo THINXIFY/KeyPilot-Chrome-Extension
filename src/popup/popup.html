@@ -135,6 +135,47 @@
       </div>
     </details>
 
+    <section class="smart-password">
+      <h2 class="smart-password__title">Smart Password</h2>
+
+      <div class="tabs" role="tablist">
+        <button id="tab-name" class="tab tab--active" type="button" role="tab" aria-selected="true">From Name</button>
+        <button id="tab-words" class="tab" type="button" role="tab" aria-selected="false">From Words</button>
+      </div>
+
+      <div id="panel-name" class="tab-panel" role="tabpanel">
+        <label class="field__label" for="smart-name-input">Name, nickname, or initials</label>
+        <input
+          id="smart-name-input"
+          class="field__input"
+          type="text"
+          placeholder="e.g. Sarah Johnson"
+          autocomplete="off"
+          spellcheck="false"
+          maxlength="40"
+        />
+      </div>
+
+      <div id="panel-words" class="tab-panel" role="tabpanel" hidden>
+        <label class="field__label" for="smart-word-1">Words (up to 3)</label>
+        <div class="word-inputs">
+          <input id="smart-word-1" class="field__input" type="text" placeholder="Word 1" autocomplete="off" spellcheck="false" maxlength="20" />
+          <input id="smart-word-2" class="field__input" type="text" placeholder="Word 2 (optional)" autocomplete="off" spellcheck="false" maxlength="20" />
+          <input id="smart-word-3" class="field__input" type="text" placeholder="Word 3 (optional)" autocomplete="off" spellcheck="false" maxlength="20" />
+        </div>
+      </div>
+
+      <button id="smart-generate-btn" class="btn btn--primary smart-password__generate" type="button" disabled>
+        Generate Suggestions
+      </button>
+
+      <div id="smart-warning" class="warning-banner" hidden>
+        Enter a name or at least one word to generate suggestions.
+      </div>
+
+      <div id="smart-results" class="smart-results"></div>
+    </section>
+
     <div class="toast" role="status" aria-live="polite"></div>
   </main>
 

@@ -23,6 +23,20 @@ fully configurable passwords.
   generation and copy are disabled until at least one character is
   available
 
+**Phase 2.1**
+- **Smart Password** section with **From Name** and **From Words** tabs
+- **From Name**: enter a first name, full name, nickname, or initials to
+  get 5 unique, memorable password suggestions that securely blend the
+  name with a random word, digits, and symbols — never the raw name or
+  a predictable pattern like `Name123`
+- **From Words**: enter up to 3 custom words to get 5 unique suggestions
+  combining them with digits, symbols, and varied capitalization
+- Each suggestion shows its own strength label, a **Copy** button with
+  a confirmation state, and a **Regenerate** button to swap just that
+  suggestion
+- All processing is local — nothing is saved or transmitted, and none
+  of the name/word input is written to `chrome.storage.local`
+
 ## Installation (load unpacked)
 
 1. Open `chrome://extensions` in Chrome.
@@ -46,6 +60,10 @@ fully configurable passwords.
 6. If every character type is turned off (or your exclusions remove all
    available characters), a warning appears and Generate/Copy are
    disabled until you re-enable at least one character type.
+7. In the **Smart Password** section, pick **From Name** or **From
+   Words**, fill in the field(s), and click **Generate Suggestions** to
+   get 5 memorable, secure password suggestions. Use **Copy** on any
+   suggestion, or **Regenerate** to get a new one in its place.
 
 ## Project structure
 
@@ -62,14 +80,17 @@ Password Generator - Chrome Extension/
 │   │   ├── passwordGenerator.js  # pure, crypto-secure, configurable generation
 │   │   ├── passwordStrength.js   # pure strength estimation
 │   │   ├── settingsStorage.js    # chrome.storage.local wrapper
+│   │   ├── smartPassword.js      # pure name/word-based suggestion generation
 │   │   └── clipboard.js          # copy-to-clipboard helper
 │   └── components/
 │       ├── toast.js              # reusable toast notification
-│       └── strengthMeter.js      # strength bar + label + count
+│       ├── strengthMeter.js      # strength bar + label + count
+│       └── smartResults.js       # suggestion cards (copy + regenerate)
 ├── test/
 │   ├── passwordGenerator.test.js
 │   ├── passwordStrength.test.js
-│   └── settingsStorage.test.js
+│   ├── settingsStorage.test.js
+│   └── smartPassword.test.js
 └── icons/                        # reserved for future icon assets
 ```
 

@@ -2,8 +2,15 @@ import { generatePassword, MIN_LENGTH, MAX_LENGTH } from '../lib/passwordGenerat
 import { calculateStrength } from '../lib/passwordStrength.js';
 import { loadSettings, saveSettings } from '../lib/settingsStorage.js';
 import { copyToClipboard } from '../lib/clipboard.js';
+import {
+  generateFromName,
+  generateFromWords,
+  generateOneFromName,
+  generateOneFromWords,
+} from '../lib/smartPassword.js';
 import { showToast } from '../components/toast.js';
 import { updateStrengthMeter } from '../components/strengthMeter.js';
+import { renderSuggestions } from '../components/smartResults.js';
 
 const passwordOutput = document.getElementById('password-output');
 const generateBtn = document.getElementById('generate-btn');
@@ -23,8 +30,23 @@ const toggleInputs = {
 const excludeSimilarInput = document.getElementById('toggle-exclude-similar');
 const excludeCharsInput = document.getElementById('exclude-chars-input');
 
+const tabNameBtn = document.getElementById('tab-name');
+const tabWordsBtn = document.getElementById('tab-words');
+const panelName = document.getElementById('panel-name');
+const panelWords = document.getElementById('panel-words');
+const smartNameInput = document.getElementById('smart-name-input');
+const smartWordInputs = [
+  document.getElementById('smart-word-1'),
+  document.getElementById('smart-word-2'),
+  document.getElementById('smart-word-3'),
+];
+const smartGenerateBtn = document.getElementById('smart-generate-btn');
+const smartWarning = document.getElementById('smart-warning');
+const smartResults = document.getElementById('smart-results');
+
 let settings = null;
 let saveTimeoutId = null;
+let activeSmartTab = 'name';
 
 function applySettingsToControls() {
   lengthInput.value = settings.length;
@@ -138,6 +160,66 @@ async function handleCopy() {
   }
 }
 
+function switchSmartTab(tab) {
+  activeSmartTab = tab;
+  const isName = tab === 'name';
+  tabNameBtn.classList.toggle('tab--active', isName);
+  tabWordsBtn.classList.toggle('tab--active', !isName);
+  tabNameBtn.setAttribute('aria-selected', String(isName));
+  tabWordsBtn.setAttribute('aria-selected', String(!isName));
+  panelName.hidden = !isName;
+  panelWords.hidden = isName;
+  smartResults.innerHTML = '';
+  smartWarning.hidden = true;
+  updateSmartGenerateState();
+}
+
+function updateSmartGenerateState() {
+  const valid = activeSmartTab === 'name'
+    ? /[a-zA-Z0-9]/.test(smartNameInput.value)
+    : smartWordInputs.some((input) => input.value.trim().length > 0);
+  smartGenerateBtn.disabled = !valid;
+}
+
+async function handleSuggestionCopy(password) {
+  try {
+    const succeeded = await copyToClipboard(password);
+    showToast(
+      app,
+      succeeded ? 'Copied to clipboard' : 'Copy failed — please try again',
+      succeeded ? 'success' : 'error'
+    );
+    return succeeded;
+  } catch {
+    showToast(app, 'Copy failed — please try again', 'error');
+    return false;
+  }
+}
+
+function regenerateActiveSuggestion() {
+  return activeSmartTab === 'name'
+    ? generateOneFromName(smartNameInput.value)
+    : generateOneFromWords(smartWordInputs.map((input) => input.value));
+}
+
+function handleSmartGenerate() {
+  const passwords = activeSmartTab === 'name'
+    ? generateFromName(smartNameInput.value)
+    : generateFromWords(smartWordInputs.map((input) => input.value));
+
+  if (!passwords || passwords.length === 0) {
+    smartWarning.hidden = false;
+    smartResults.innerHTML = '';
+    return;
+  }
+
+  smartWarning.hidden = true;
+  renderSuggestions(smartResults, passwords, {
+    onCopy: handleSuggestionCopy,
+    onRegenerate: regenerateActiveSuggestion,
+  });
+}
+
 async function init() {
   settings = await loadSettings();
   applySettingsToControls();
@@ -155,6 +237,13 @@ async function init() {
   toggleInputs.symbols.addEventListener('change', handleToggleChange);
   excludeSimilarInput.addEventListener('change', handleToggleChange);
   excludeCharsInput.addEventListener('input', handleToggleChange);
+
+  tabNameBtn.addEventListener('click', () => switchSmartTab('name'));
+  tabWordsBtn.addEventListener('click', () => switchSmartTab('words'));
+  smartNameInput.addEventListener('input', updateSmartGenerateState);
+  smartWordInputs.forEach((input) => input.addEventListener('input', updateSmartGenerateState));
+  smartGenerateBtn.addEventListener('click', handleSmartGenerate);
+  updateSmartGenerateState();
 }
 
 init();
