@@ -5,6 +5,6 @@
   "description": "CipherKey — a premium, offline Chrome extension password generator.",
   "type": "module",
   "scripts": {
-    "test": "node --test test/"
+    "test": "node --test test/*.js"
   }
 }
