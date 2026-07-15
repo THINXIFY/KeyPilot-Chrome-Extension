@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "CipherKey",
-  "short_name": "CipherKey",
-  "version": "1.1.0",
-  "description": "Generate strong, secure passwords instantly — fully offline.",
+  "name": "KeyPilot",
+  "short_name": "KeyPilot",
+  "version": "1.2.0",
+  "description": "Smart Password Generator for Chrome",
   "action": {
     "default_popup": "src/popup/popup.html"
   },

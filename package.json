@@ -1,8 +1,8 @@
 {
-  "name": "cipherkey-password-generator",
-  "version": "1.0.0",
+  "name": "keypilot-password-generator",
+  "version": "1.2.0",
   "private": true,
-  "description": "CipherKey — a premium, offline Chrome extension password generator.",
+  "description": "KeyPilot — a premium, offline Chrome extension password security toolkit.",
   "type": "module",
   "scripts": {
     "test": "node --test test/*.js"
