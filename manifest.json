@@ -2,9 +2,10 @@
   "manifest_version": 3,
   "name": "CipherKey",
   "short_name": "CipherKey",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Generate strong, secure passwords instantly — fully offline.",
   "action": {
     "default_popup": "src/popup/popup.html"
-  }
+  },
+  "permissions": ["storage"]
 }
