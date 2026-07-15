@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CipherKey</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="app__header">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="9" fill="url(#logo-gradient)" />
+          <path d="M16 9a4 4 0 0 0-4 4v2h-1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1h-1v-2a4 4 0 0 0-4-4Zm0 2a2 2 0 0 1 2 2v2h-4v-2a2 2 0 0 1 2-2Z" fill="#FFFFFF" />
+          <defs>
+            <linearGradient id="logo-gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#0057FF" />
+              <stop offset="1" stop-color="#0042C2" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="app__titles">
+        <h1 class="app__title">CipherKey</h1>
+        <p class="app__subtitle">Secure passwords, instantly.</p>
+      </div>
+    </header>
+
+    <section class="card">
+      <label class="visually-hidden" for="password-output">Generated password</label>
+      <input
+        id="password-output"
+        class="password-output"
+        type="text"
+        readonly
+        spellcheck="false"
+        autocomplete="off"
+      />
+    </section>
+
+    <div class="actions">
+      <button id="generate-btn" class="btn btn--primary" type="button">
+        Generate Password
+      </button>
+      <button id="copy-btn" class="btn btn--secondary" type="button">
+        Copy
+      </button>
+    </div>
+
+    <div class="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
