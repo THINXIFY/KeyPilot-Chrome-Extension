@@ -1,0 +1,10 @@
+{
+  "name": "cipherkey-password-generator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CipherKey — a premium, offline Chrome extension password generator.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/"
+  }
+}
