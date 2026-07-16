@@ -34,6 +34,14 @@ import {
   clearRecent,
 } from '../lib/passwordLibrary.js';
 import {
+  loadAccounts,
+  addAccount,
+  updateAccount,
+  deleteAccount,
+  searchAccounts,
+  normalizeVaultUrl,
+} from '../lib/accountVault.js';
+import {
   loadSettings,
   saveSettings,
   loadSmartMode,
@@ -48,6 +56,7 @@ import { renderSuggestions } from '../components/smartResults.js';
 import { renderUsernames } from '../components/usernameResults.js';
 import { renderBulkList } from '../components/bulkResults.js';
 import { renderLibraryList } from '../components/libraryResults.js';
+import { renderVaultList } from '../components/vaultResults.js';
 
 const passwordOutput = document.getElementById('password-output');
 const passwordCard = document.querySelector('.card');
@@ -171,7 +180,30 @@ const screens = {
   tools: document.getElementById('screen-tools'),
   checker: document.getElementById('screen-checker'),
   settings: document.getElementById('screen-settings'),
+  vault: document.getElementById('screen-vault'),
 };
+
+const headerQuickGenerateBtn = document.getElementById('header-quick-generate-btn');
+const headerFavoritesBtn = document.getElementById('header-favorites-btn');
+const headerVaultBtn = document.getElementById('header-vault-btn');
+const headerSettingsBtn = document.getElementById('header-settings-btn');
+
+const vaultSearchInput = document.getElementById('vault-search-input');
+const vaultAddBtn = document.getElementById('vault-add-btn');
+const vaultForm = document.getElementById('vault-form');
+const vaultFormHeading = document.getElementById('vault-form-heading');
+const vaultInputLabel = document.getElementById('vault-input-label');
+const vaultInputUrl = document.getElementById('vault-input-url');
+const vaultInputUsername = document.getElementById('vault-input-username');
+const vaultInputPassword = document.getElementById('vault-input-password');
+const vaultTogglePasswordBtn = document.getElementById('vault-toggle-password-btn');
+const vaultGeneratePasswordBtn = document.getElementById('vault-generate-password-btn');
+const vaultInputCategory = document.getElementById('vault-input-category');
+const vaultInputNotes = document.getElementById('vault-input-notes');
+const vaultFormWarning = document.getElementById('vault-form-warning');
+const vaultSaveBtn = document.getElementById('vault-save-btn');
+const vaultCancelBtn = document.getElementById('vault-cancel-btn');
+const vaultResultsEl = document.getElementById('vault-results');
 
 let settings = null;
 let saveTimeoutId = null;
@@ -181,13 +213,17 @@ let activeUsernameStyle = 'professional';
 let activeSmartMode = 'name';
 let activeSeparator = '-';
 let activeTheme = 'nature';
+let vaultAccounts = [];
+let editingVaultId = null;
 
 function switchScreen(name) {
   Object.keys(screens).forEach((key) => {
     const isActive = key === name;
     screens[key].hidden = !isActive;
-    navItems[key].classList.toggle('app__nav-item--active', isActive);
-    navItems[key].setAttribute('aria-selected', String(isActive));
+    if (navItems[key]) {
+      navItems[key].classList.toggle('app__nav-item--active', isActive);
+      navItems[key].setAttribute('aria-selected', String(isActive));
+    }
   });
 }
 
@@ -753,6 +789,144 @@ async function handleToolsCopyAll() {
   }
 }
 
+// Header quick actions — jump to another screen, mostly reusing existing
+// screen/mode logic rather than duplicating it.
+function handleHeaderQuickGenerate() {
+  switchScreen('generator');
+  renderPassword();
+}
+
+function handleHeaderFavorites() {
+  switchScreen('tools');
+  switchToolsMode('favorites');
+}
+
+function handleHeaderVault() {
+  switchScreen('vault');
+  refreshVaultList();
+}
+
+function handleHeaderSettings() {
+  switchScreen('settings');
+}
+
+// Saved Accounts Vault — deliberately separate from Favorites/Recent:
+// full account records (site, username, notes, category) rather than
+// bare passwords, and copying from here never touches Recent.
+async function copyVaultField(text, label) {
+  if (!text) return;
+  try {
+    const succeeded = await copyToClipboard(text);
+    showToast(app, succeeded ? `${label} copied to clipboard` : 'Copy failed — please try again', succeeded ? 'success' : 'error');
+  } catch {
+    showToast(app, 'Copy failed — please try again', 'error');
+  }
+}
+
+function openVaultUrl(url) {
+  const normalized = normalizeVaultUrl(url);
+  if (!normalized) return;
+  window.open(normalized, '_blank', 'noopener,noreferrer');
+}
+
+function renderFilteredVaultList() {
+  const filtered = searchAccounts(vaultAccounts, vaultSearchInput.value);
+  vaultResultsEl.hidden = false;
+
+  renderVaultList(vaultResultsEl, filtered, {
+    emptyMessage: vaultAccounts.length === 0
+      ? 'No saved accounts yet. Tap "+ Add Account" to save your first one.'
+      : 'No accounts match your search.',
+    onCopy: copyVaultField,
+    onEdit: openVaultForm,
+    onDelete: handleVaultDelete,
+    onOpenUrl: openVaultUrl,
+  });
+}
+
+async function refreshVaultList() {
+  vaultAccounts = await loadAccounts();
+  renderFilteredVaultList();
+}
+
+function handleVaultTogglePasswordVisibility() {
+  const isHidden = vaultInputPassword.type === 'password';
+  vaultInputPassword.type = isHidden ? 'text' : 'password';
+  vaultTogglePasswordBtn.textContent = isHidden ? 'Hide' : 'Show';
+  vaultTogglePasswordBtn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+}
+
+function handleVaultGeneratePassword() {
+  const generated = generatePassword(settings);
+  if (!generated) return;
+  vaultInputPassword.value = generated;
+  vaultInputPassword.type = 'text';
+  vaultTogglePasswordBtn.textContent = 'Hide';
+  vaultTogglePasswordBtn.setAttribute('aria-label', 'Hide password');
+}
+
+function openVaultForm(entry) {
+  editingVaultId = entry ? entry.id : null;
+  vaultFormHeading.textContent = entry ? 'Edit Account' : 'Add Account';
+  vaultSaveBtn.textContent = entry ? 'Save Changes' : 'Save Account';
+  vaultInputLabel.value = entry ? entry.label : '';
+  vaultInputUrl.value = entry ? entry.url : '';
+  vaultInputUsername.value = entry ? entry.username : '';
+  vaultInputPassword.value = entry ? entry.password : '';
+  vaultInputPassword.type = 'password';
+  vaultTogglePasswordBtn.textContent = 'Show';
+  vaultTogglePasswordBtn.setAttribute('aria-label', 'Show password');
+  vaultInputCategory.value = entry ? entry.category : '';
+  vaultInputNotes.value = entry ? entry.notes : '';
+  vaultFormWarning.hidden = true;
+  vaultForm.hidden = false;
+  vaultAddBtn.hidden = true;
+  vaultInputLabel.focus();
+}
+
+function closeVaultForm() {
+  editingVaultId = null;
+  vaultForm.hidden = true;
+  vaultAddBtn.hidden = false;
+  vaultFormWarning.hidden = true;
+}
+
+async function handleVaultSave() {
+  const label = vaultInputLabel.value.trim();
+  const password = vaultInputPassword.value;
+
+  if (!label || !password) {
+    vaultFormWarning.hidden = false;
+    return;
+  }
+
+  const payload = {
+    label,
+    url: vaultInputUrl.value.trim(),
+    username: vaultInputUsername.value.trim(),
+    password,
+    category: vaultInputCategory.value.trim(),
+    notes: vaultInputNotes.value.trim(),
+  };
+
+  if (editingVaultId) {
+    await updateAccount(editingVaultId, payload);
+    showToast(app, 'Account updated', 'success');
+  } else {
+    await addAccount(payload);
+    showToast(app, 'Account saved', 'success');
+  }
+
+  closeVaultForm();
+  await refreshVaultList();
+}
+
+async function handleVaultDelete(id) {
+  await deleteAccount(id);
+  showToast(app, 'Account deleted', 'success');
+  await refreshVaultList();
+}
+
 async function handleRememberToggle() {
   const remember = rememberToggle.checked;
   await setRememberPreferences(remember);
@@ -895,6 +1069,20 @@ async function init() {
   Object.keys(navItems).forEach((key) => {
     navItems[key].addEventListener('click', () => switchScreen(key));
   });
+
+  headerQuickGenerateBtn.addEventListener('click', handleHeaderQuickGenerate);
+  headerFavoritesBtn.addEventListener('click', handleHeaderFavorites);
+  headerVaultBtn.addEventListener('click', handleHeaderVault);
+  headerSettingsBtn.addEventListener('click', handleHeaderSettings);
+
+  vaultAddBtn.addEventListener('click', () => openVaultForm(null));
+  vaultCancelBtn.addEventListener('click', closeVaultForm);
+  vaultSaveBtn.addEventListener('click', handleVaultSave);
+  vaultTogglePasswordBtn.addEventListener('click', handleVaultTogglePasswordVisibility);
+  vaultGeneratePasswordBtn.addEventListener('click', handleVaultGeneratePassword);
+  vaultSearchInput.addEventListener('input', renderFilteredVaultList);
+  vaultInputLabel.addEventListener('input', () => { vaultFormWarning.hidden = true; });
+  vaultInputPassword.addEventListener('input', () => { vaultFormWarning.hidden = true; });
 }
 
 init();

@@ -10,6 +10,21 @@
     <header class="app__header">
       <h1 class="visually-hidden">KeyPilot</h1>
       <img class="app__logo" src="../../keypilot-logo.png" alt="" />
+
+      <div class="app__header-actions">
+        <button id="header-quick-generate-btn" class="app__header-btn" type="button" title="Quick Generate" aria-label="Quick generate a new password">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>
+        </button>
+        <button id="header-favorites-btn" class="app__header-btn" type="button" title="Favorites" aria-label="View favorite passwords">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.77l-5.8 3.1 1.11-6.47-4.7-4.58 6.49-.94L12 3Z"/></svg>
+        </button>
+        <button id="header-vault-btn" class="app__header-btn" type="button" title="Saved Accounts" aria-label="View saved accounts">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 7.7 7 9 4-1.3 7-4.5 7-9V6l-7-3Z"/><path d="m9.5 12 1.8 1.8L15 10"/></svg>
+        </button>
+        <button id="header-settings-btn" class="app__header-btn" type="button" title="Settings" aria-label="Open settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a7.97 7.97 0 0 0 0-3l2-1.5-2-3.4-2.3.9a8 8 0 0 0-2.6-1.5L14 2h-4l-.5 2a8 8 0 0 0-2.6 1.5l-2.3-.9-2 3.4 2 1.5a8 8 0 0 0 0 3l-2 1.5 2 3.4 2.3-.9a8 8 0 0 0 2.6 1.5L10 22h4l.5-2a8 8 0 0 0 2.6-1.5l2.3.9 2-3.4-2-1.5Z"/></svg>
+        </button>
+      </div>
     </header>
 
     <nav class="app__nav" role="tablist" aria-label="Sections">
@@ -563,6 +578,81 @@
           preferences" is on.
         </p>
       </div>
+    </section>
+
+    <section id="screen-vault" class="screen" role="tabpanel" aria-labelledby="header-vault-btn" hidden>
+      <p class="screen__subtitle">Save full account details — securely, entirely on this device.</p>
+
+      <div class="field">
+        <label class="field__label visually-hidden" for="vault-search-input">Search saved accounts</label>
+        <input
+          id="vault-search-input"
+          class="field__input"
+          type="text"
+          placeholder="Search by name, site, or username"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+
+      <button id="vault-add-btn" class="btn btn--primary" type="button">+ Add Account</button>
+
+      <div id="vault-form" class="vault-form" hidden>
+        <h2 id="vault-form-heading" class="vault-form__heading">Add Account</h2>
+
+        <div class="field">
+          <label class="field__label" for="vault-input-label">Account name *</label>
+          <input id="vault-input-label" class="field__input" type="text" placeholder="e.g. Gmail, Netflix" autocomplete="off" maxlength="60" />
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="vault-input-url">Website URL</label>
+          <input id="vault-input-url" class="field__input" type="text" placeholder="e.g. gmail.com" autocomplete="off" maxlength="200" />
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="vault-input-username">Username or email</label>
+          <input id="vault-input-username" class="field__input" type="text" placeholder="you@example.com" autocomplete="off" maxlength="100" />
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="vault-input-password">Password *</label>
+          <div class="vault-password-row">
+            <input id="vault-input-password" class="field__input" type="password" placeholder="Enter or generate a password" autocomplete="off" maxlength="128" />
+            <button id="vault-toggle-password-btn" class="checker-toggle-btn" type="button" aria-label="Show password">Show</button>
+            <button id="vault-generate-password-btn" class="checker-toggle-btn" type="button">Generate</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="vault-input-category">Category or tag</label>
+          <input id="vault-input-category" class="field__input" type="text" list="vault-category-options" placeholder="e.g. Work, Banking, Social" autocomplete="off" maxlength="40" />
+          <datalist id="vault-category-options">
+            <option value="Social"></option>
+            <option value="Banking"></option>
+            <option value="Work"></option>
+            <option value="Email"></option>
+            <option value="Shopping"></option>
+            <option value="Gaming"></option>
+          </datalist>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="vault-input-notes">Notes (optional)</label>
+          <textarea id="vault-input-notes" class="field__input field__textarea" rows="3" maxlength="300" placeholder="Any extra details..."></textarea>
+        </div>
+
+        <div id="vault-form-warning" class="warning-banner" role="alert" hidden>
+          Enter an account name and password to save this account.
+        </div>
+
+        <div class="smart-results-actions">
+          <button id="vault-save-btn" class="suggestion-card__btn" type="button">Save Account</button>
+          <button id="vault-cancel-btn" class="suggestion-card__btn suggestion-card__btn--secondary" type="button">Cancel</button>
+        </div>
+      </div>
+
+      <div id="vault-results" class="vault-results"></div>
     </section>
 
     <div class="toast" role="status" aria-live="polite"></div>

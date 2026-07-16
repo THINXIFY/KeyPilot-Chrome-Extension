@@ -58,14 +58,57 @@ body {
 .app__header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
   padding-bottom: var(--space-2);
 }
 
 .app__logo {
   display: block;
-  width: 100%;
   max-width: 130px;
   height: auto;
+}
+
+.app__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.app__header-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-card-bg);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast),
+    background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.app__header-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.app__header-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-heading);
+  transform: translateY(-1px);
+}
+
+.app__header-btn:active {
+  transform: scale(0.94);
+}
+
+.app__header-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .app__nav {
@@ -542,6 +585,13 @@ body {
 
 .field__input::placeholder {
   color: var(--color-text-muted);
+}
+
+.field__textarea {
+  resize: vertical;
+  min-height: 60px;
+  font-family: var(--font-sans);
+  line-height: 1.4;
 }
 
 .select {
@@ -1236,4 +1286,190 @@ body {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 2px;
+}
+
+/* Saved Accounts Vault */
+
+.vault-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  animation: fade-scale-in var(--transition-med);
+}
+
+.vault-form[hidden] {
+  display: none;
+}
+
+.vault-form__heading {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-heading);
+}
+
+.vault-password-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.vault-password-row .field__input {
+  flex: 1;
+  min-width: 0;
+}
+
+.vault-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.vault-results[hidden] {
+  display: none;
+}
+
+.vault-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  transition: border-color var(--transition-fast);
+}
+
+.vault-card:hover {
+  border-color: #232840;
+}
+
+.vault-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.vault-card__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-heading);
+  overflow-wrap: anywhere;
+}
+
+.vault-card__tag {
+  flex-shrink: 0;
+  border: 1px solid var(--color-card-border);
+  border-radius: 999px;
+  padding: 2px var(--space-2);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.vault-card__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.vault-card__value {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.vault-card__value--password {
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
+}
+
+.vault-card__mini-btn {
+  flex-shrink: 0;
+  border: 1px solid var(--color-card-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.vault-card__mini-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-heading);
+}
+
+.vault-card__mini-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.vault-card__link {
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--color-primary);
+  font-size: 12px;
+  text-decoration: underline;
+  text-align: left;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.vault-card__link:hover {
+  color: var(--color-heading);
+}
+
+.vault-card__link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.vault-card__notes {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* Modern scrollbars — thin, dark, rounded, subtle blue hover */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2A3049 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #2A3049;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-primary);
 }

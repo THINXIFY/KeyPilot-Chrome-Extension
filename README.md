@@ -7,6 +7,30 @@ configurable defaults — without ever sending your data anywhere.
 
 ## Features
 
+**Header**
+- Compact icon buttons on the right of the header, each with a native
+  tooltip: **Quick Generate** (jumps to Generator and generates a new
+  password in one click), **Favorites** (jumps straight to Tools →
+  Favorites), **Saved Accounts** (opens the Vault), and **Settings**
+
+**Saved Accounts Vault**
+- Save a full account record, not just a password: account name/label,
+  website URL, username or email, password, an optional category/tag,
+  and optional notes
+- **Add**, **Edit**, **Search** (by name, site, username, category, or
+  notes), and **Delete** accounts, all in a clean card list
+- Per-account **Show/Hide** password toggle (masked by default),
+  **Copy** for both username and password, and an **Open** link that
+  launches the saved website in a new tab
+- A **Generate** button inside the Add/Edit form fills the password
+  field using your current Generator settings
+- Clean empty state when nothing's saved yet, and a "no accounts
+  match" state while searching
+- Deliberately separate from the Generator: copying a Vault password
+  never adds it to Recent Passwords, and everything here is reached
+  through its own screen (via the header's Saved Accounts icon), not
+  mixed into the Generator/Smart/Tools flow
+
 **Generator**
 - Crypto-secure password generation (`crypto.getRandomValues`, never
   `Math.random`)
@@ -143,6 +167,17 @@ configurable defaults — without ever sending your data anywhere.
     password is an explicit action, so it's always honored regardless
     of that preferences setting. If you'd rather nothing be kept at
     all, simply don't use ☆ Favorite, and periodically clear Recent.
+- **The Saved Accounts Vault is the same kind of deliberate exception,
+  by design**: every field you save for an account — including the
+  password — is written to `chrome.storage.local` in plaintext so it
+  can be shown back to you later. This is local to your device only,
+  never transmitted anywhere, and only happens when you explicitly tap
+  **Save Account**. There is no separate master password or
+  encryption-at-rest beyond what Chrome's storage already provides —
+  the Vault is a convenience for keeping account details together, not
+  a hardened password manager. Delete entries individually with each
+  card's **Delete** button; there's currently no "clear all" for the
+  Vault.
 - Everything else — your length/character-type settings, your
   last-used Smart mode, and the remember-preferences flag itself — is
   non-sensitive UI preference data, written to `chrome.storage.local`
@@ -169,7 +204,11 @@ configurable defaults — without ever sending your data anywhere.
 
 1. Click the KeyPilot toolbar icon to open the popup.
 2. Use the top navigation to switch between **Generator**, **Smart**,
-   **Tools**, **Checker**, and **Settings**.
+   **Tools**, **Checker**, and **Settings**. The header's icon buttons
+   are shortcuts to common actions from anywhere: **⚡ Quick Generate**
+   (jump to Generator and generate instantly), **★ Favorites** (jump to
+   Tools → Favorites), **🛡 Saved Accounts** (open the Vault), and
+   **⚙ Settings**.
 3. On **Generator**: a password is generated automatically using your
    last-used settings. Pick a **preset** (Banking, Email, Social, Work,
    Gaming, Developer) to instantly apply a recommended configuration,
@@ -204,6 +243,12 @@ configurable defaults — without ever sending your data anywhere.
    toggle whether KeyPilot remembers your preferences on this device,
    reset everything to defaults, or check the About card for the
    installed version and privacy statement.
+8. On the **Saved Accounts Vault** (header's shield icon): search
+   existing accounts, tap **+ Add Account** to save a new one (name and
+   password are required; URL, username, category, and notes are
+   optional — use **Generate** to fill the password from your current
+   Generator settings), or use any card's **Show/Hide**, **Copy**,
+   site link, **Edit**, and **Delete** actions.
 
 ## Project structure
 
@@ -232,6 +277,7 @@ Password Generator - Chrome Extension/
 │   │   ├── bulkGenerator.js        # Bulk password generation (10/25/50/100)
 │   │   ├── usernameGenerator.js    # Username generation (4 styles, random + custom word)
 │   │   ├── passwordLibrary.js      # Favorites/Recent chrome.storage.local wrapper
+│   │   ├── accountVault.js         # Saved Accounts Vault chrome.storage.local wrapper (CRUD + search)
 │   │   ├── similarPassword.js      # Generate Similar (matches length + character profile)
 │   │   ├── comparePasswords.js     # Compare Passwords analysis + winner
 │   │   ├── exportPasswords.js      # TXT/CSV formatting + file download
@@ -246,7 +292,8 @@ Password Generator - Chrome Extension/
 │       ├── smartResults.js       # suggestion cards (copy + regenerate + favorite)
 │       ├── usernameResults.js    # username cards (copy + regenerate, no strength/length)
 │       ├── bulkResults.js        # compact scrollable bulk-password list
-│       └── libraryResults.js     # Favorites/Recent list (copy + similar + favorite-or-remove)
+│       ├── libraryResults.js     # Favorites/Recent list (copy + similar + favorite-or-remove)
+│       └── vaultResults.js       # Saved Accounts cards (show/hide, copy, open URL, edit, delete)
 └── test/
     ├── passwordGenerator.test.js
     ├── passwordStrength.test.js
@@ -261,6 +308,7 @@ Password Generator - Chrome Extension/
     ├── bulkGenerator.test.js
     ├── usernameGenerator.test.js
     ├── passwordLibrary.test.js
+    ├── accountVault.test.js
     ├── similarPassword.test.js
     ├── comparePasswords.test.js
     ├── exportPasswords.test.js
@@ -345,11 +393,32 @@ functionality without breaking what came before.
     random behavior unchanged.
   - The header logo (`.app__logo`) was reduced from 190px to 130px max
     width for a less dominant, more balanced header.
+- **Phase 6 — Account Vault, Header & UI Improvements**:
+  - **Saved Accounts Vault**: a new screen for saving full account
+    records (name/label, URL, username/email, password, category/tag,
+    notes) — separate from the Generator/Smart/Tools flow. Supports
+    Add, Edit, Search, and Delete, per-account Show/Hide and Copy, and
+    opening the saved site in a new tab. Copying from the Vault
+    deliberately does not touch Recent Passwords, keeping it a
+    distinct feature rather than blending into generated-password
+    tracking.
+  - **Header redesign**: four compact icon buttons (Quick Generate,
+    Favorites, Saved Accounts, Settings) with native tooltips on the
+    right of the header, giving one-click access to the most-used
+    actions from any screen without crowding the primary navigation.
+  - **Favorites discoverability fix**: the header's ★ button jumps
+    straight to Tools → Favorites (which already had full view/copy/
+    remove support) instead of requiring users to find it themselves.
+  - **Modern scrollbars**: a thin, dark, rounded-thumb scrollbar with a
+    subtle blue hover state, applied consistently everywhere the popup
+    scrolls (bulk results, library lists, the new Vault list).
 
 ## Roadmap
 
-Future phases may add cloud sync, autofill, account login, and full
-password-manager functionality (linking saved passwords to sites,
-encrypted vaults, etc.). These remain intentionally out of scope for
-now — Favorites/Recent are a lightweight local convenience, not a
-password manager.
+Future phases may add cloud sync, autofill, account login, and true
+password-manager functionality (encrypted vaults, master-password
+protection, browser autofill integration, etc.). These remain
+intentionally out of scope for now — the Saved Accounts Vault and
+Favorites/Recent are lightweight local conveniences, storing plaintext
+in `chrome.storage.local` with no additional encryption, not a
+hardened password manager.
