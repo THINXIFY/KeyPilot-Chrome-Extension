@@ -61,16 +61,8 @@
 
       <div class="settings-card">
         <div class="control control--presets">
-          <label class="control__label" for="preset-select">Presets</label>
-          <select id="preset-select" class="select select--icon">
-            <option value="">Custom</option>
-            <option value="banking">Banking</option>
-            <option value="email">Email</option>
-            <option value="social">Social</option>
-            <option value="work">Work</option>
-            <option value="gaming">Gaming</option>
-            <option value="developer">Developer</option>
-          </select>
+          <label class="control__label" id="preset-select-label">Presets</label>
+          <div id="preset-select" class="dropdown dropdown--icon"></div>
         </div>
 
         <div class="control">
@@ -178,15 +170,8 @@
       <p class="screen__subtitle">Generate a memorable password from a name, words, or a theme.</p>
 
       <div class="field">
-        <label class="field__label" for="smart-mode-select">Mode</label>
-        <select id="smart-mode-select" class="select">
-          <option value="name">From Name</option>
-          <option value="words">From Words</option>
-          <option value="memorable">Memorable</option>
-          <option value="passphrase">Passphrase</option>
-          <option value="pronounceable">Pronounceable</option>
-          <option value="theme">Theme-Based</option>
-        </select>
+        <label class="field__label" id="smart-mode-select-label">Mode</label>
+        <div id="smart-mode-select" class="dropdown"></div>
       </div>
 
       <div id="panel-name" class="mode-panel">
@@ -368,11 +353,8 @@
       <p class="screen__subtitle">Check any password's strength, crack time, and get tips to improve it.</p>
 
       <div class="field">
-        <label class="field__label" for="checker-mode-select">Mode</label>
-        <select id="checker-mode-select" class="select">
-          <option value="check">Check Password</option>
-          <option value="compare">Compare Passwords</option>
-        </select>
+        <label class="field__label" id="checker-mode-select-label">Mode</label>
+        <div id="checker-mode-select" class="dropdown"></div>
       </div>
 
       <div id="panel-check" class="mode-panel">
@@ -529,15 +511,8 @@
         </div>
 
         <div class="control">
-          <label class="field__label" for="settings-mode-select">Default Smart mode</label>
-          <select id="settings-mode-select" class="select">
-            <option value="name">From Name</option>
-            <option value="words">From Words</option>
-            <option value="memorable">Memorable</option>
-            <option value="passphrase">Passphrase</option>
-            <option value="pronounceable">Pronounceable</option>
-            <option value="theme">Theme-Based</option>
-          </select>
+          <label class="field__label" id="settings-mode-select-label">Default Smart mode</label>
+          <div id="settings-mode-select" class="dropdown"></div>
         </div>
       </div>
 
@@ -625,16 +600,8 @@
         </div>
 
         <div class="field">
-          <label class="field__label" for="vault-input-category">Category or tag</label>
-          <input id="vault-input-category" class="field__input" type="text" list="vault-category-options" placeholder="e.g. Work, Banking, Social" autocomplete="off" maxlength="40" />
-          <datalist id="vault-category-options">
-            <option value="Social"></option>
-            <option value="Banking"></option>
-            <option value="Work"></option>
-            <option value="Email"></option>
-            <option value="Shopping"></option>
-            <option value="Gaming"></option>
-          </datalist>
+          <label class="field__label" id="vault-input-category-label">Category or tag</label>
+          <div id="vault-input-category" class="dropdown"></div>
         </div>
 
         <div class="field">

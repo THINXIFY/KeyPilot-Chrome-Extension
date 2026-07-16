@@ -24,12 +24,27 @@ configurable defaults — without ever sending your data anywhere.
   launches the saved website in a new tab
 - A **Generate** button inside the Add/Edit form fills the password
   field using your current Generator settings
+- **Category/tag** is a searchable dropdown with predefined categories
+  (Work, Personal, Banking, Social, Shopping, Gaming, Developer) —
+  type to filter, or type a category that doesn't exist yet and select
+  **+ Add "…"** to create it on the spot. Custom categories are saved
+  locally and show up as regular options the next time you add or edit
+  an account
 - Clean empty state when nothing's saved yet, and a "no accounts
   match" state while searching
 - Deliberately separate from the Generator: copying a Vault password
   never adds it to Recent Passwords, and everything here is reached
   through its own screen (via the header's Saved Accounts icon), not
   mixed into the Generator/Smart/Tools flow
+
+**Dropdowns**
+- Every dropdown in the app (Generator Presets, Smart Mode, Checker
+  Mode, Settings' Default Smart Mode, and the Vault's Category/tag
+  picker) uses the same custom-built, premium dropdown component —
+  rounded floating panel, smooth open/close animation, a checkmark on
+  the selected option, hover/active highlighting, and full keyboard
+  support (arrow keys, type-ahead, Enter, Escape). No native `<select>`
+  elements remain in the popup
 
 **Generator**
 - Crypto-secure password generation (`crypto.getRandomValues`, never
@@ -177,7 +192,10 @@ configurable defaults — without ever sending your data anywhere.
   the Vault is a convenience for keeping account details together, not
   a hardened password manager. Delete entries individually with each
   card's **Delete** button; there's currently no "clear all" for the
-  Vault.
+  Vault. Any **custom category/tag** you create from the Add/Edit form
+  is also saved locally (separately from the account records) purely
+  so it's available as a normal option next time — the same local-only
+  treatment as everything else here.
 - Everything else — your length/character-type settings, your
   last-used Smart mode, and the remember-preferences flag itself — is
   non-sensitive UI preference data, written to `chrome.storage.local`
@@ -247,8 +265,10 @@ configurable defaults — without ever sending your data anywhere.
    existing accounts, tap **+ Add Account** to save a new one (name and
    password are required; URL, username, category, and notes are
    optional — use **Generate** to fill the password from your current
-   Generator settings), or use any card's **Show/Hide**, **Copy**,
-   site link, **Edit**, and **Delete** actions.
+   Generator settings, and the **Category** field lets you pick a
+   predefined category, search, or type a new one and select **+ Add
+   "…"** to create it), or use any card's **Show/Hide**, **Copy**, site
+   link, **Edit**, and **Delete** actions.
 
 ## Project structure
 
@@ -293,7 +313,8 @@ Password Generator - Chrome Extension/
 │       ├── usernameResults.js    # username cards (copy + regenerate, no strength/length)
 │       ├── bulkResults.js        # compact scrollable bulk-password list
 │       ├── libraryResults.js     # Favorites/Recent list (copy + similar + favorite-or-remove)
-│       └── vaultResults.js       # Saved Accounts cards (show/hide, copy, open URL, edit, delete)
+│       ├── vaultResults.js       # Saved Accounts cards (show/hide, copy, open URL, edit, delete)
+│       └── dropdown.js           # shared custom dropdown/combobox (replaces every native <select>)
 └── test/
     ├── passwordGenerator.test.js
     ├── passwordStrength.test.js
@@ -412,6 +433,26 @@ functionality without breaking what came before.
   - **Modern scrollbars**: a thin, dark, rounded-thumb scrollbar with a
     subtle blue hover state, applied consistently everywhere the popup
     scrolls (bulk results, library lists, the new Vault list).
+- **Phase 7 — Saved Accounts & Dropdown Redesign**:
+  - **Category/tag became a searchable, extensible combobox**: the
+    Vault's Category field now offers predefined categories (Work,
+    Personal, Banking, Social, Shopping, Gaming, Developer) plus
+    type-to-search and inline custom-category creation. New categories
+    persist in `chrome.storage.local` (separately from account
+    records) and reappear as normal options on every future Add/Edit.
+  - **Every dropdown in the app was rebuilt from scratch**: Generator
+    Presets, Smart Mode, Checker Mode, Settings' Default Smart Mode,
+    and the new Category combobox all now share one custom component
+    (`src/components/dropdown.js`) — a floating, animated panel with
+    hover/selected states, a checkmark on the current choice, and full
+    keyboard support (arrows, type-ahead, Enter, Escape), replacing
+    every native `<select>`/`<datalist>` in the popup. The now-unused
+    native `.select`/`.select--icon` CSS was removed.
+  - Existing state-driven logic (presets, Smart Mode syncing between
+    the Smart and Settings screens, Checker Mode) was preserved exactly
+    — the new dropdowns call the same handler functions the old
+    `change` listeners did, just via a direct callback instead of
+    reading `.value` off a native element.
 
 ## Roadmap
 

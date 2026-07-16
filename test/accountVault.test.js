@@ -8,6 +8,9 @@ import {
   clearAccounts,
   searchAccounts,
   normalizeVaultUrl,
+  loadCategories,
+  addCategory,
+  DEFAULT_VAULT_CATEGORIES,
 } from '../src/lib/accountVault.js';
 
 function createMockChromeStorage() {
@@ -163,6 +166,51 @@ test('searchAccounts matches label, url, username, category, and notes case-inse
   assert.deepEqual(searchAccounts(accounts, 'family').map((a) => a.label), ['Netflix']);
   assert.deepEqual(searchAccounts(accounts, 'entertainment').map((a) => a.label), ['Netflix']);
   assert.deepEqual(searchAccounts(accounts, 'nonexistent'), []);
+});
+
+test('loadCategories resolves to the default list when chrome.storage is unavailable', async () => {
+  assert.deepEqual(await loadCategories(), DEFAULT_VAULT_CATEGORIES);
+});
+
+test('loadCategories includes defaults plus any persisted custom categories', async () => {
+  await withMockChrome(async () => {
+    await addCategory('Streaming');
+    const categories = await loadCategories();
+    assert.deepEqual(categories, [...DEFAULT_VAULT_CATEGORIES, 'Streaming']);
+  });
+});
+
+test('addCategory persists a new category and returns the merged list', async () => {
+  await withMockChrome(async () => {
+    const result = await addCategory('Streaming');
+    assert.deepEqual(result, [...DEFAULT_VAULT_CATEGORIES, 'Streaming']);
+  });
+});
+
+test('addCategory does not duplicate an existing default category (case-insensitive)', async () => {
+  await withMockChrome(async () => {
+    const result = await addCategory('work');
+    assert.deepEqual(result, DEFAULT_VAULT_CATEGORIES);
+  });
+});
+
+test('addCategory does not duplicate an existing custom category', async () => {
+  await withMockChrome(async () => {
+    await addCategory('Streaming');
+    const result = await addCategory('streaming');
+    assert.deepEqual(result, [...DEFAULT_VAULT_CATEGORIES, 'Streaming']);
+  });
+});
+
+test('addCategory trims whitespace and ignores empty input', async () => {
+  await withMockChrome(async () => {
+    await addCategory('  Freelance  ');
+    const categories = await loadCategories();
+    assert.ok(categories.includes('Freelance'));
+
+    const unchanged = await addCategory('   ');
+    assert.deepEqual(unchanged, categories);
+  });
 });
 
 test('normalizeVaultUrl adds https:// to bare domains but leaves existing schemes alone', () => {

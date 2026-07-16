@@ -40,6 +40,8 @@ import {
   deleteAccount,
   searchAccounts,
   normalizeVaultUrl,
+  loadCategories,
+  addCategory,
 } from '../lib/accountVault.js';
 import {
   loadSettings,
@@ -57,6 +59,31 @@ import { renderUsernames } from '../components/usernameResults.js';
 import { renderBulkList } from '../components/bulkResults.js';
 import { renderLibraryList } from '../components/libraryResults.js';
 import { renderVaultList } from '../components/vaultResults.js';
+import { createDropdown } from '../components/dropdown.js';
+
+const PRESET_OPTIONS = [
+  { value: '', label: 'Custom' },
+  { value: 'banking', label: 'Banking' },
+  { value: 'email', label: 'Email' },
+  { value: 'social', label: 'Social' },
+  { value: 'work', label: 'Work' },
+  { value: 'gaming', label: 'Gaming' },
+  { value: 'developer', label: 'Developer' },
+];
+
+const SMART_MODE_OPTIONS = [
+  { value: 'name', label: 'From Name' },
+  { value: 'words', label: 'From Words' },
+  { value: 'memorable', label: 'Memorable' },
+  { value: 'passphrase', label: 'Passphrase' },
+  { value: 'pronounceable', label: 'Pronounceable' },
+  { value: 'theme', label: 'Theme-Based' },
+];
+
+const CHECKER_MODE_OPTIONS = [
+  { value: 'check', label: 'Check Password' },
+  { value: 'compare', label: 'Compare Passwords' },
+];
 
 const passwordOutput = document.getElementById('password-output');
 const passwordCard = document.querySelector('.card');
@@ -79,9 +106,9 @@ const excludeSimilarInput = document.getElementById('toggle-exclude-similar');
 const avoidRepeatedInput = document.getElementById('toggle-avoid-repeated');
 const avoidSequentialInput = document.getElementById('toggle-avoid-sequential');
 const excludeCharsInput = document.getElementById('exclude-chars-input');
-const presetSelect = document.getElementById('preset-select');
+const presetSelectMount = document.getElementById('preset-select');
 
-const smartModeSelect = document.getElementById('smart-mode-select');
+const smartModeMount = document.getElementById('smart-mode-select');
 const modePanels = {
   name: document.getElementById('panel-name'),
   words: document.getElementById('panel-words'),
@@ -133,12 +160,12 @@ const usernameResultsEl = document.getElementById('username-results');
 const libraryResultsEl = document.getElementById('library-results');
 
 const settingsLengthInput = document.getElementById('settings-length-input');
-const settingsModeSelect = document.getElementById('settings-mode-select');
+const settingsModeMount = document.getElementById('settings-mode-select');
 const rememberToggle = document.getElementById('remember-preferences-toggle');
 const resetSettingsBtn = document.getElementById('reset-settings-btn');
 const aboutVersionEl = document.getElementById('about-version');
 
-const checkerModeSelect = document.getElementById('checker-mode-select');
+const checkerModeMount = document.getElementById('checker-mode-select');
 const panelCheck = document.getElementById('panel-check');
 const panelCompare = document.getElementById('panel-compare');
 
@@ -198,7 +225,7 @@ const vaultInputUsername = document.getElementById('vault-input-username');
 const vaultInputPassword = document.getElementById('vault-input-password');
 const vaultTogglePasswordBtn = document.getElementById('vault-toggle-password-btn');
 const vaultGeneratePasswordBtn = document.getElementById('vault-generate-password-btn');
-const vaultInputCategory = document.getElementById('vault-input-category');
+const vaultCategoryMount = document.getElementById('vault-input-category');
 const vaultInputNotes = document.getElementById('vault-input-notes');
 const vaultFormWarning = document.getElementById('vault-form-warning');
 const vaultSaveBtn = document.getElementById('vault-save-btn');
@@ -214,6 +241,12 @@ let activeSmartMode = 'name';
 let activeSeparator = '-';
 let activeTheme = 'nature';
 let vaultAccounts = [];
+let vaultCategories = [];
+let presetDropdown = null;
+let smartModeDropdown = null;
+let settingsModeDropdown = null;
+let checkerModeDropdown = null;
+let categoryDropdown = null;
 let editingVaultId = null;
 
 function switchScreen(name) {
@@ -301,7 +334,7 @@ function persistSettings() {
 }
 
 function clearActivePreset() {
-  presetSelect.value = '';
+  presetDropdown.setValue('', { silent: true });
 }
 
 function handleToggleChange() {
@@ -333,8 +366,8 @@ function handleSettingsLengthChange() {
   applyLengthValue(settingsLengthInput.value);
 }
 
-function handlePresetSelect() {
-  const presetSettings = getPresetSettings(presetSelect.value);
+function handlePresetSelect(presetValue) {
+  const presetSettings = getPresetSettings(presetValue);
   if (!presetSettings) return;
 
   settings = { ...settings, ...presetSettings };
@@ -447,8 +480,8 @@ function regenerateOneForActiveMode() {
 
 function switchSmartMode(mode) {
   activeSmartMode = mode;
-  smartModeSelect.value = mode;
-  settingsModeSelect.value = mode;
+  smartModeDropdown.setValue(mode, { silent: true });
+  settingsModeDropdown.setValue(mode, { silent: true });
   Object.keys(modePanels).forEach((key) => {
     modePanels[key].hidden = key !== mode;
   });
@@ -555,7 +588,7 @@ function handleCheckerToggleVisibility() {
 }
 
 function switchCheckerMode(mode) {
-  checkerModeSelect.value = mode;
+  checkerModeDropdown.setValue(mode, { silent: true });
   panelCheck.hidden = mode !== 'check';
   panelCompare.hidden = mode !== 'compare';
 }
@@ -849,6 +882,27 @@ async function refreshVaultList() {
   renderFilteredVaultList();
 }
 
+async function initCategoryDropdown() {
+  vaultCategories = await loadCategories();
+  categoryDropdown = createDropdown(vaultCategoryMount, {
+    options: [{ value: '', label: 'None' }, ...vaultCategories.map((c) => ({ value: c, label: c }))],
+    value: '',
+    searchable: true,
+    allowCustom: true,
+    labelledBy: 'vault-input-category-label',
+    placeholder: 'Select or add a category',
+    searchPlaceholder: 'Search or add a category…',
+    onCreateCustom: (label) => ({ value: label, label }),
+    onChange: async (categoryValue) => {
+      if (!categoryValue) return;
+      const alreadyKnown = vaultCategories.some((c) => c.toLowerCase() === categoryValue.toLowerCase());
+      if (alreadyKnown) return;
+      vaultCategories = await addCategory(categoryValue);
+      categoryDropdown.setOptions([{ value: '', label: 'None' }, ...vaultCategories.map((c) => ({ value: c, label: c }))]);
+    },
+  });
+}
+
 function handleVaultTogglePasswordVisibility() {
   const isHidden = vaultInputPassword.type === 'password';
   vaultInputPassword.type = isHidden ? 'text' : 'password';
@@ -876,7 +930,7 @@ function openVaultForm(entry) {
   vaultInputPassword.type = 'password';
   vaultTogglePasswordBtn.textContent = 'Show';
   vaultTogglePasswordBtn.setAttribute('aria-label', 'Show password');
-  vaultInputCategory.value = entry ? entry.category : '';
+  categoryDropdown.setValue(entry ? entry.category : '', { silent: true });
   vaultInputNotes.value = entry ? entry.notes : '';
   vaultFormWarning.hidden = true;
   vaultForm.hidden = false;
@@ -905,7 +959,7 @@ async function handleVaultSave() {
     url: vaultInputUrl.value.trim(),
     username: vaultInputUsername.value.trim(),
     password,
-    category: vaultInputCategory.value.trim(),
+    category: categoryDropdown.getValue().trim(),
     notes: vaultInputNotes.value.trim(),
   };
 
@@ -1021,13 +1075,29 @@ async function init() {
   avoidRepeatedInput.addEventListener('change', handleToggleChange);
   avoidSequentialInput.addEventListener('change', handleToggleChange);
   excludeCharsInput.addEventListener('input', handleToggleChange);
-  presetSelect.addEventListener('change', handlePresetSelect);
+  presetDropdown = createDropdown(presetSelectMount, {
+    options: PRESET_OPTIONS,
+    value: '',
+    labelledBy: 'preset-select-label',
+    onChange: handlePresetSelect,
+  });
+
+  smartModeDropdown = createDropdown(smartModeMount, {
+    options: SMART_MODE_OPTIONS,
+    value: activeSmartMode,
+    labelledBy: 'smart-mode-select-label',
+    onChange: switchSmartMode,
+  });
+  settingsModeDropdown = createDropdown(settingsModeMount, {
+    options: SMART_MODE_OPTIONS,
+    value: activeSmartMode,
+    labelledBy: 'settings-mode-select-label',
+    onChange: switchSmartMode,
+  });
 
   const savedSmartMode = await loadSmartMode();
   switchSmartMode(savedSmartMode);
 
-  smartModeSelect.addEventListener('change', () => switchSmartMode(smartModeSelect.value));
-  settingsModeSelect.addEventListener('change', () => switchSmartMode(settingsModeSelect.value));
   smartNameInput.addEventListener('input', updateSmartGenerateState);
   smartWordInputs.forEach((input) => input.addEventListener('input', updateSmartGenerateState));
   smartGenerateBtn.addEventListener('click', handleSmartGenerate);
@@ -1041,8 +1111,13 @@ async function init() {
   checkerToggleBtn.addEventListener('click', handleCheckerToggleVisibility);
   checkerGenerateBtn.addEventListener('click', handleCheckerGenerate);
 
+  checkerModeDropdown = createDropdown(checkerModeMount, {
+    options: CHECKER_MODE_OPTIONS,
+    value: 'check',
+    labelledBy: 'checker-mode-select-label',
+    onChange: switchCheckerMode,
+  });
   switchCheckerMode('check');
-  checkerModeSelect.addEventListener('change', () => switchCheckerMode(checkerModeSelect.value));
   compareInputA.addEventListener('input', runCompareAnalysis);
   compareInputB.addEventListener('input', runCompareAnalysis);
   compareToggleA.addEventListener('click', () => handleCompareToggleVisibility(compareInputA, compareToggleA));
@@ -1075,6 +1150,7 @@ async function init() {
   headerVaultBtn.addEventListener('click', handleHeaderVault);
   headerSettingsBtn.addEventListener('click', handleHeaderSettings);
 
+  await initCategoryDropdown();
   vaultAddBtn.addEventListener('click', () => openVaultForm(null));
   vaultCancelBtn.addEventListener('click', closeVaultForm);
   vaultSaveBtn.addEventListener('click', handleVaultSave);

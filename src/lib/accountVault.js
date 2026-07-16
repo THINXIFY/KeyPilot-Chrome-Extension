@@ -1,4 +1,7 @@
 const VAULT_KEY = 'keypilotVault';
+const CATEGORIES_KEY = 'keypilotVaultCategories';
+
+export const DEFAULT_VAULT_CATEGORIES = ['Work', 'Personal', 'Banking', 'Social', 'Shopping', 'Gaming', 'Developer'];
 
 function hasChromeStorage() {
   return typeof chrome !== 'undefined' && !!chrome.storage && !!chrome.storage.local;
@@ -74,6 +77,28 @@ export function searchAccounts(accounts, query) {
   if (!q) return accounts;
   return accounts.filter((entry) => [entry.label, entry.url, entry.username, entry.category, entry.notes]
     .some((field) => (field || '').toLowerCase().includes(q)));
+}
+
+export async function loadCategories() {
+  if (!hasChromeStorage()) return [...DEFAULT_VAULT_CATEGORIES];
+  const result = await chrome.storage.local.get(CATEGORIES_KEY);
+  const custom = Array.isArray(result[CATEGORIES_KEY]) ? result[CATEGORIES_KEY] : [];
+  return [...DEFAULT_VAULT_CATEGORIES, ...custom];
+}
+
+export async function addCategory(category) {
+  const trimmed = (category || '').trim();
+  if (!trimmed) return loadCategories();
+
+  const all = await loadCategories();
+  if (all.some((c) => c.toLowerCase() === trimmed.toLowerCase())) return all;
+  if (!hasChromeStorage()) return [...all, trimmed];
+
+  const result = await chrome.storage.local.get(CATEGORIES_KEY);
+  const custom = Array.isArray(result[CATEGORIES_KEY]) ? result[CATEGORIES_KEY] : [];
+  const updatedCustom = [...custom, trimmed];
+  await chrome.storage.local.set({ [CATEGORIES_KEY]: updatedCustom });
+  return [...DEFAULT_VAULT_CATEGORIES, ...updatedCustom];
 }
 
 export function normalizeVaultUrl(url) {
